@@ -57,6 +57,16 @@ const KNOWN: Known[] = [
     hint: "Відкрий console.cloud.google.com → APIs & Services → Library → «Google Play Android Developer API» → Enable. Почекай пару хвилин.",
   },
   {
+    test: /billing permission|BILLING permission|does not have any in-app products/i,
+    message: "Google ще не дозволяє створювати підписки для цього застосунку.",
+    hint: "Спершу завантаж збірку з бібліотекою Google Play Billing (у маніфесті є дозвіл com.android.vending.BILLING) — достатньо чернетки на внутрішньому тестуванні. Після цього підписки стануть доступні.",
+  },
+  {
+    test: /merchant account|payments profile/i,
+    message: "Для платних підписок потрібен платіжний профіль.",
+    hint: "Play Console → «Налаштування» → «Платіжний профіль»: створи профіль продавця. Без нього Google не приймає ціни.",
+  },
+  {
     test: /This edit has already been (?:replaced|committed)|edit has been deleted|edit.*(?:expired|not found)/i,
     message: "Сесія змін (edit) застаріла.",
     hint: "Google закрив сесію змін, бо застосунок змінювали паралельно (інша вкладка, Play Console) або минуло багато часу. Просто повтори дію; якщо це був майстер релізу — завантаж файл ще раз.",

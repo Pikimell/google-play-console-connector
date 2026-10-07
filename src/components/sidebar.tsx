@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  BarChart3, FileText, FlaskConical, Home, Languages, Image as ImageIcon, LogOut, Menu, MessageSquare, Plus, Rocket, Settings, Settings2, Users, Layers, X,
+  BarChart3, CreditCard, FileText, FlaskConical, Home, Languages, Image as ImageIcon, LogOut, Menu, MessageSquare, Plus, Rocket, Settings, Settings2, Users, Layers, X,
 } from "lucide-react";
 import { useApps } from "./apps-context";
 import { AppIcon } from "./app-icon";
@@ -18,6 +18,7 @@ export const APP_NAV = [
   { href: "/localize", label: "Локалізація", icon: Languages },
   { href: "/graphics", label: "Графіка", icon: ImageIcon },
   { href: "/details", label: "Контакти", icon: Settings2 },
+  { href: "/subscriptions", label: "Підписки", icon: CreditCard },
   { href: "/reviews", label: "Відгуки", icon: MessageSquare },
 ];
 

@@ -87,3 +87,46 @@ export type Review = {
 export type ApiErrorBody = {
   error: { status: number; message: string; hint?: string; details?: string };
 };
+
+// ---------- Підписки ----------
+
+export type BasePlanKind = "autoRenewing" | "prepaid" | "installments";
+/** ACTIVE, INACTIVE або DRAFT — як у Google Play. */
+export type BasePlanState = "ACTIVE" | "INACTIVE" | "DRAFT" | "STATE_UNSPECIFIED";
+
+/** Ціна в регіоні: amount — число в одиницях валюти (наприклад 4.99). */
+export type RegionPrice = { region: string; currency: string; amount: number };
+
+export type BasePlan = {
+  basePlanId: string;
+  state: BasePlanState;
+  kind: BasePlanKind;
+  /** ISO 8601: P1W, P1M, P3M, P6M, P1Y. */
+  period?: string;
+  prices: RegionPrice[];
+  otherRegions?: { usd?: number; eur?: number };
+};
+
+export type SubscriptionListing = {
+  language: string;
+  title: string;
+  description?: string;
+  benefits: string[];
+};
+
+export type Subscription = {
+  productId: string;
+  archived: boolean;
+  listings: SubscriptionListing[];
+  basePlans: BasePlan[];
+};
+
+/** Нова ціна, яку Google перерахує в усі регіони. */
+export type PriceInput = { currency: string; amount: number };
+
+export type NewBasePlan = {
+  basePlanId: string;
+  kind: "autoRenewing" | "prepaid";
+  period: string;
+  price: PriceInput;
+};
