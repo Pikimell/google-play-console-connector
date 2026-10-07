@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Адмін-панель: усі дані живі (Google Play API), тому кешування компонентів вимкнене.
   reactCompiler: true,
+  serverExternalPackages: ["googleapis"],
   turbopack: {
     rules: {
       "*.css": {

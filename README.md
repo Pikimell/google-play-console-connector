@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Play Publisher — керування Google Play Console
 
-## Getting Started
+Панель на Next.js для роботи з Google Play Developer API (Android Publisher v3): завантаження нових версій, закрите тестування з тестувальниками, опис у магазині, графіка, відгуки.
 
-First, run the development server:
+## Запуск
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Відкрий http://localhost:3000 → «Підключення» — там покрокова перевірка.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Що куди покласти
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Що | Куди |
+|---|---|
+| JSON-ключ сервісного акаунта | `credentials/service-account.json` |
+| Пароль на панель (рекомендовано) | `.env.local` → `ADMIN_PASSWORD=...` |
 
-## Learn More
+Для хостингу без файлової системи замість файлу можна задати `GOOGLE_SERVICE_ACCOUNT_JSON` (вміст JSON або base64). Зверни увагу: список застосунків і групи тестувальників зберігаються у `data/store.json`, тому на serverless-хостингу (Vercel) вони не збережуться. Найкраще запускати панель локально або на VPS.
 
-To learn more about Next.js, take a look at the following resources:
+## Сторінки
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Головна** — швидкі дії й список застосунків.
+- **Підключення** — перевірка ключа і покрокова інструкція з доступу.
+- **Додати застосунок** — підключити наявний або покроково створити новий.
+- **Застосунок → Огляд** — що зараз опубліковано на кожному треку.
+- **Нова версія** — майстер: файл AAB/APK → трек → «Що нового» → публікація (одразу, поступово або чернетка).
+- **Релізи й треки** — змінити відсоток розгортання, пауза/відновлення, 100%, перенести версію в інший трек.
+- **Закрите тестування** — список треків, майстер створення нового тестування, керування тестувальниками треку.
+- **Опис у магазині**, **Графіка**, **Контакти**, **Відгуки**.
+- **Тестувальники** — групи email-адрес, спільні для всіх застосунків (копіювання, CSV для Play Console).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Обмеження Google Play API (і як панель їх обходить)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Створити новий застосунок через API не можна** — лише в Play Console. Панель проводить через цей крок.
+- **Список усіх застосунків API не віддає** — застосунки додаються в панель один раз за назвою пакета.
+- **Тестувальників через API можна призначати лише Google-групами.** Email-списки Play Console через API недоступні. Панель зберігає email-и у себе, прив'язує Google-групу до треку автоматично, а для email-списків дає CSV-файл для завантаження в Play Console.
+- **Внутрішнє тестування** приймає лише email-списки — їх задають у Play Console один раз.
+- **Обов'язкові анкети** (вікова категорія, безпека даних, реклама, цільова аудиторія тощо) заповнюються лише в Play Console. Поки вони не заповнені, релізи можна зберігати тільки як чернетки.
+- **Відгуки**: API повертає лише відгуки з текстом за останні 7 днів.
