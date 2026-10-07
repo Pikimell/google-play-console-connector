@@ -4,7 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { route } from "@/lib/route";
-import { getPublisher } from "@/lib/google";
+import { discardEdit, getPublisher, pinEdit, withEditLock } from "@/lib/google";
 import { assertPackage } from "@/lib/play";
 import { ApiError } from "@/lib/errors";
 
@@ -28,8 +28,13 @@ export const POST = route<{ pkg: string }>(async (req, { pkg }) => {
     if (size < 1024) throw new ApiError(400, "Файл порожній або пошкоджений.");
 
     const api = getPublisher();
-    const edit = await api.edits.insert({ packageName: pkg });
-    const editId = edit.data.id!;
+    // edit створюємо ексклюзивно і одразу закріплюємо: поки файл вантажиться (і далі в майстрі),
+    // інші запити читають через нього і не «вбивають» його.
+    const editId = await withEditLock(pkg, async () => {
+      const edit = await api.edits.insert({ packageName: pkg });
+      pinEdit(pkg, edit.data.id!);
+      return edit.data.id!;
+    });
     try {
       const media = { mimeType: "application/octet-stream", body: fs.createReadStream(tmp) };
       if (kind === "aab") {
@@ -39,7 +44,7 @@ export const POST = route<{ pkg: string }>(async (req, { pkg }) => {
       const res = await api.edits.apks.upload({ packageName: pkg, editId, media }, { timeout: 30 * 60 * 1000 });
       return { editId, kind, versionCode: res.data.versionCode, sha256: res.data.binary?.sha256, size };
     } catch (e) {
-      await api.edits.delete({ packageName: pkg, editId }).catch(() => {});
+      await discardEdit(pkg, editId);
       throw e;
     }
   } finally {

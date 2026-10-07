@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Languages, Plus, Trash2 } from "lucide-react";
 import { useApp } from "@/components/apps-context";
-import { Badge, Button, Card, ErrorBox, Field, Input, Modal, PageHeader, Select, Skeleton, Textarea, cn, useToast } from "@/components/ui";
+import { Alert, Badge, Button, Card, ErrorBox, Field, Input, LinkButton, Modal, PageHeader, Select, Skeleton, Textarea, cn, useToast } from "@/components/ui";
 import { api, enc, errorInfo, type ErrInfo } from "@/lib/client";
 import { useApi } from "@/lib/hooks";
 import { LANGUAGES, languageName } from "@/lib/tracks";
@@ -10,12 +11,16 @@ import type { Listing } from "@/lib/types";
 
 type Data = { defaultLanguage?: string; listings: Listing[] };
 
-export default function ListingPage() {
+function ListingEditor() {
   const { pkg, reload: reloadApp } = useApp();
   const toast = useToast();
   const url = `/api/apps/${enc(pkg)}/listings`;
   const { data, error, loading, reload } = useApi<Data>(url);
-  const [lang, setLang] = useState<string>();
+  const search = useSearchParams();
+  const [lang, setLang] = useState<string | undefined>(search.get("lang") ?? undefined);
+  const status = useApi<{ openai: { configured: boolean } }>("/api/status");
+  const [translating, setTranslating] = useState(false);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [edits, setEdits] = useState<Record<string, Listing>>({});
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState<ErrInfo>();
@@ -30,6 +35,30 @@ export default function ListingPage() {
   const form = (current && edits[current]) || original;
   const dirty = !!current && !!edits[current] && JSON.stringify(edits[current]) !== JSON.stringify(original);
   const set = (patch: Partial<Listing>) => current && setEdits({ ...edits, [current]: { ...form, ...patch } });
+
+  // Джерело для перекладу: англійська (en-US), а якщо редагуємо її саму — основна мова
+  const translateFrom = listings.find((l) => l.language === "en-US" && l.language !== current) ?? listings.find((l) => l.language === data?.defaultLanguage && l.language !== current);
+
+  async function translate() {
+    if (!translateFrom || !current) return;
+    if (dirty && !confirm("Замінити незбережені зміни перекладом?")) return;
+    setTranslating(true);
+    setSaveError(undefined);
+    setWarnings([]);
+    try {
+      const res = await api<{ translation: Partial<Listing>; warnings: string[] }>("/api/translate", {
+        method: "POST",
+        json: { source: translateFrom, target: current },
+      });
+      setEdits({ ...edits, [current]: { ...form, ...res.translation, video: form.video || translateFrom.video || "" } });
+      setWarnings(res.warnings);
+      toast("info", "Переклад готовий — перевір і натисни «Зберегти в Google Play»");
+    } catch (e) {
+      setSaveError(errorInfo(e));
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   async function save() {
     setBusy(true);
@@ -64,7 +93,11 @@ export default function ListingPage() {
 
   return (
     <>
-      <PageHeader title="Опис у магазині" description="Назва та описи на сторінці застосунку в Google Play — для кожної мови окремо." />
+      <PageHeader
+        title="Опис у магазині"
+        description="Назва та описи на сторінці застосунку в Google Play — для кожної мови окремо."
+        actions={<LinkButton variant="secondary" href={`/apps/${enc(pkg)}/localize`} icon={<Languages className="size-4" />}>Перекласти на багато мов</LinkButton>}
+      />
       <ErrorBox error={error} onRetry={reload} className="mb-4" />
       {loading && !data ? (
         <Skeleton className="h-96" />
@@ -88,8 +121,24 @@ export default function ListingPage() {
             <Card className="space-y-5 p-6">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold">{languageName(current)} <span className="font-mono text-xs text-gray-400">{current}</span></h2>
-                {current !== data.defaultLanguage && <Button size="sm" variant="ghost" icon={<Trash2 className="size-3.5" />} onClick={removeLang}>Видалити переклад</Button>}
+                <div className="flex flex-wrap gap-1.5">
+                  {translateFrom && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={translating}
+                      disabled={!status.data?.openai.configured}
+                      title={status.data?.openai.configured ? undefined : "Підключи OpenAI на сторінці «Підключення»"}
+                      icon={<Languages className="size-3.5" />}
+                      onClick={translate}
+                    >
+                      Перекласти з {languageName(translateFrom.language)}
+                    </Button>
+                  )}
+                  {current !== data.defaultLanguage && <Button size="sm" variant="ghost" icon={<Trash2 className="size-3.5" />} onClick={removeLang}>Видалити</Button>}
+                </div>
               </div>
+              {warnings.length > 0 && <Alert tone="warning">{warnings.join(" ")}</Alert>}
               <Field label="Назва застосунку" counter={{ value: form.title?.length ?? 0, max: 30 }}>
                 <Input value={form.title} onChange={(e) => set({ title: e.target.value })} />
               </Field>
@@ -125,5 +174,13 @@ export default function ListingPage() {
         <p className="mt-2 text-xs text-gray-500">Переклад з&apos;явиться в Google Play після збереження.</p>
       </Modal>
     </>
+  );
+}
+
+export default function ListingPage() {
+  return (
+    <Suspense fallback={<Skeleton className="h-96" />}>
+      <ListingEditor />
+    </Suspense>
   );
 }

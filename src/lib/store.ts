@@ -10,7 +10,12 @@ import { parseEmails } from "./emails";
  * Google Play API не вміє ні показувати список застосунків акаунта, ні зберігати email-списки тестувальників,
  * тому ці дані панель тримає у себе.
  */
-type StoreData = { apps: StoredApp[]; testerGroups: TesterGroup[] };
+type StoreData = {
+  apps: StoredApp[];
+  testerGroups: TesterGroup[];
+  /** Треки, приховані в панелі (Google не дозволяє видаляти треки). Ключ — назва пакета. */
+  hiddenTracks: Record<string, string[]>;
+};
 
 const FILE = path.resolve(/*turbopackIgnore: true*/ process.cwd(), process.env.DATA_DIR ?? "data", "store.json");
 let queue: Promise<unknown> = Promise.resolve();
@@ -18,9 +23,9 @@ let queue: Promise<unknown> = Promise.resolve();
 async function read(): Promise<StoreData> {
   try {
     const parsed = JSON.parse(await fs.readFile(FILE, "utf8")) as Partial<StoreData>;
-    return { apps: parsed.apps ?? [], testerGroups: parsed.testerGroups ?? [] };
+    return { apps: parsed.apps ?? [], testerGroups: parsed.testerGroups ?? [], hiddenTracks: parsed.hiddenTracks ?? {} };
   } catch {
-    return { apps: [], testerGroups: [] };
+    return { apps: [], testerGroups: [], hiddenTracks: {} };
   }
 }
 
@@ -60,6 +65,22 @@ export function upsertApp(app: StoredApp) {
 export function removeApp(packageName: string) {
   return mutate((d) => {
     d.apps = d.apps.filter((a) => a.packageName !== packageName);
+  });
+}
+
+// ---------- Приховані треки ----------
+
+export async function getHiddenTracks(packageName: string) {
+  return (await read()).hiddenTracks[packageName] ?? [];
+}
+
+export function setTrackHidden(packageName: string, track: string, hidden: boolean) {
+  return mutate((d) => {
+    const set = new Set(d.hiddenTracks[packageName] ?? []);
+    if (hidden) set.add(track);
+    else set.delete(track);
+    d.hiddenTracks[packageName] = [...set];
+    return d.hiddenTracks[packageName];
   });
 }
 

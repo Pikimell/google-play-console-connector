@@ -1,6 +1,6 @@
 import "server-only";
 import type { androidpublisher_v3 } from "googleapis";
-import { readInEdit, writeInEdit, getPublisher, commitEdit } from "./google";
+import { readInEdit, writeInEdit, getPublisher, commitEdit, withEditLock } from "./google";
 import type { AppDetails, AppOverview, Bundle, ImageType, Listing, Release, ReleaseNote, ReleaseStatus, StoreImage, Track } from "./types";
 import { ApiError } from "./errors";
 
@@ -129,8 +129,10 @@ export async function publishRelease(pkg: string, input: ReleaseInput, editId?: 
   const api = getPublisher();
   if (editId) {
     // edit з уже завантаженим файлом. Якщо щось не так — edit не видаляємо, щоб можна було виправити дані й повторити.
-    await setRelease(api, pkg, editId, input);
-    return commitEdit(pkg, editId);
+    return withEditLock(pkg, async () => {
+      await setRelease(api, pkg, editId, input);
+      return commitEdit(pkg, editId);
+    });
   }
   return writeInEdit(pkg, (id) => setRelease(api, pkg, id, input));
 }
@@ -145,7 +147,7 @@ export async function changeRollout(
     const res = await api.edits.tracks.get({ packageName: pkg, editId, track });
     const releases = res.data.releases ?? [];
     const target = releases.find((r) => r.status === "inProgress" || r.status === "halted");
-    if (!target) throw new ApiError(400, "На цьому треку немає релізу з поступовим розгортанням.");
+    if (!target) throw new ApiError(400, "На цьому треку немає релізу, який можна змінити.");
     if (action.type === "fraction") {
       if (!(action.userFraction > 0 && action.userFraction < 1)) throw new ApiError(400, "Відсоток має бути між 0 і 100.");
       target.userFraction = action.userFraction;
@@ -153,7 +155,8 @@ export async function changeRollout(
     } else if (action.type === "halt") {
       target.status = "halted";
     } else if (action.type === "resume") {
-      target.status = "inProgress";
+      // призупинений повний реліз відновлюється як completed, поступовий — як inProgress
+      target.status = target.userFraction ? "inProgress" : "completed";
     } else {
       target.status = "completed";
       delete target.userFraction;
@@ -215,24 +218,36 @@ export async function getListings(pkg: string): Promise<{ defaultLanguage?: stri
   });
 }
 
-export async function saveListing(pkg: string, l: Listing) {
-  if ((l.title ?? "").length > 30) throw new ApiError(400, "Назва — максимум 30 символів.");
-  if ((l.shortDescription ?? "").length > 80) throw new ApiError(400, "Короткий опис — максимум 80 символів.");
-  if ((l.fullDescription ?? "").length > 4000) throw new ApiError(400, "Повний опис — максимум 4000 символів.");
+function validateListing(l: Listing) {
+  if (!l.language) throw new ApiError(400, "Не вказано мову.");
+  if ((l.title ?? "").length > 30) throw new ApiError(400, `Назва (${l.language}) — максимум 30 символів.`);
+  if ((l.shortDescription ?? "").length > 80) throw new ApiError(400, `Короткий опис (${l.language}) — максимум 80 символів.`);
+  if ((l.fullDescription ?? "").length > 4000) throw new ApiError(400, `Повний опис (${l.language}) — максимум 4000 символів.`);
+}
+
+/** Зберегти один або кілька описів (кілька мов) одним комітом. */
+export async function saveListings(pkg: string, listings: Listing[]) {
+  listings.forEach(validateListing);
   return writeInEdit(pkg, async (editId, api) => {
-    await api.edits.listings.update({
-      packageName: pkg,
-      editId,
-      language: l.language,
-      requestBody: {
+    for (const l of listings) {
+      await api.edits.listings.update({
+        packageName: pkg,
+        editId,
         language: l.language,
-        title: l.title,
-        shortDescription: l.shortDescription,
-        fullDescription: l.fullDescription,
-        video: l.video || undefined,
-      },
-    });
+        requestBody: {
+          language: l.language,
+          title: l.title,
+          shortDescription: l.shortDescription,
+          fullDescription: l.fullDescription,
+          video: l.video || undefined,
+        },
+      });
+    }
   });
+}
+
+export function saveListing(pkg: string, l: Listing) {
+  return saveListings(pkg, [l]);
 }
 
 export async function deleteListing(pkg: string, language: string) {
@@ -333,29 +348,31 @@ export async function setupClosedTesting(pkg: string, input: ClosedTestingInput)
   if (!name && !input.existingTrack) throw new ApiError(400, "Не вказано трек.");
   if (input.release) validateRelease({ ...input.release, track: name || input.existingTrack! });
 
-  const editId = input.editId ?? (await api.edits.insert({ packageName: pkg })).data.id!;
-  try {
-    let track = input.existingTrack!;
-    if (name) {
-      const created = await api.edits.tracks.create({
-        packageName: pkg,
-        editId,
-        requestBody: { track: name, type: "CLOSED_TESTING", formFactor: "DEFAULT" },
-      });
-      track = created.data.track ?? name;
+  return withEditLock(pkg, async () => {
+    const editId = input.editId ?? (await api.edits.insert({ packageName: pkg })).data.id!;
+    try {
+      let track = input.existingTrack!;
+      if (name) {
+        const created = await api.edits.tracks.create({
+          packageName: pkg,
+          editId,
+          requestBody: { track: name, type: "CLOSED_TESTING", formFactor: "DEFAULT" },
+        });
+        track = created.data.track ?? name;
+      }
+      const groups = [...new Set(input.googleGroups.map((g) => g.trim().toLowerCase()).filter(Boolean))];
+      if (groups.length) {
+        await api.edits.testers.update({ packageName: pkg, editId, track, requestBody: { googleGroups: groups } });
+      }
+      if (input.release) await setRelease(api, pkg, editId, { ...input.release, track });
+      const commit = await commitEdit(pkg, editId);
+      return { track, ...commit };
+    } catch (e) {
+      // edit з файлом залишаємо, щоб можна було повторити; власний — прибираємо
+      if (!input.editId) await api.edits.delete({ packageName: pkg, editId }).catch(() => {});
+      throw e;
     }
-    const groups = [...new Set(input.googleGroups.map((g) => g.trim().toLowerCase()).filter(Boolean))];
-    if (groups.length) {
-      await api.edits.testers.update({ packageName: pkg, editId, track, requestBody: { googleGroups: groups } });
-    }
-    if (input.release) await setRelease(api, pkg, editId, { ...input.release, track });
-    const commit = await commitEdit(pkg, editId);
-    return { track, ...commit };
-  } catch (e) {
-    // edit з файлом залишаємо, щоб можна було повторити; власний — прибираємо
-    if (!input.editId) await api.edits.delete({ packageName: pkg, editId }).catch(() => {});
-    throw e;
-  }
+  });
 }
 
 // ---------- «Видалення» тестування ----------

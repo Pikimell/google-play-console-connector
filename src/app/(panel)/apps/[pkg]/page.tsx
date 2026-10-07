@@ -47,7 +47,8 @@ export default function OverviewPage() {
   const apps = useApps();
   const { data, loading, reload, pkg } = useApp();
   const base = `/apps/${enc(pkg)}`;
-  const tracks = [...(data?.overview.tracks ?? [])].sort((a, b) => trackSortKey(a.track) - trackSortKey(b.track));
+  const hidden = new Set(data?.hiddenTracks ?? []);
+  const tracks = [...(data?.overview.tracks ?? [])].filter((t) => !hidden.has(t.track)).sort((a, b) => trackSortKey(a.track) - trackSortKey(b.track));
   const active = tracks.filter((t) => t.releases.length > 0);
   const empty = tracks.filter((t) => t.releases.length === 0);
 

@@ -57,7 +57,7 @@ function ReleaseWizard() {
 
   const allTracks = new Map((overview?.tracks ?? []).map((t) => [t.track, t]));
   for (const t of STANDARD_TRACKS) if (!allTracks.has(t)) allTracks.set(t, { track: t, releases: [] });
-  const trackList = [...allTracks.values()].filter((t) => !t.track.includes(":")).sort((a, b) => trackSortKey(b.track) - trackSortKey(a.track));
+  const trackList = [...allTracks.values()].filter((t) => !t.track.includes(":") && (t.track === track || !data?.hiddenTracks.includes(t.track))).sort((a, b) => trackSortKey(b.track) - trackSortKey(a.track));
   const info = track ? trackInfo(track) : null;
   const versionCode = source === "upload" ? uploaded?.versionCode : existingCode;
   const effectiveStatus: Status = info?.kind !== "production" && status === "inProgress" ? "completed" : status;

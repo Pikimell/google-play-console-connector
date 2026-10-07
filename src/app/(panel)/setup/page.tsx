@@ -9,6 +9,7 @@ type Status = {
   token?: { ok: boolean; error?: string; hint?: string };
   passwordEnabled: boolean;
   appsCount: number;
+  openai: { configured: boolean; model: string; customModel: boolean; ok?: boolean; error?: string; hint?: string };
 };
 
 function Step({ n, state, title, children }: { n: number; state: "ok" | "fail" | "todo"; title: string; children: React.ReactNode }) {
@@ -107,6 +108,31 @@ export default function SetupPage() {
           )}
         </Step>
       </div>
+
+      <h2 className="mt-10 mb-1 text-lg font-semibold">Додатково: OpenAI для автоматичного перекладу</h2>
+      <p className="mb-4 text-sm text-gray-600">Потрібно лише для сторінки «Локалізація» — перекладу опису в магазині на інші мови.</p>
+      <Step n={6} state={data?.openai.ok ? "ok" : data?.openai.configured && data.openai.ok === false ? "fail" : "todo"} title="Підключити OpenAI (ChatGPT)">
+        {data?.openai.configured ? (
+          data.openai.ok ? (
+            <p>
+              Підключено. Модель: <Badge tone="green">{data.openai.model}</Badge>
+              {!data.openai.customModel && <span className="text-gray-500"> (за замовчуванням — дешева й якісна для перекладів)</span>}
+            </p>
+          ) : (
+            <Alert tone="error" title={data.openai.error ?? "OpenAI недоступний"}>{data.openai.hint}</Alert>
+          )
+        ) : (
+          <p>Ключ ще не додано.</p>
+        )}
+        <ol className="list-decimal space-y-1 pl-5">
+          <li>Створи API-ключ: {ext("https://platform.openai.com/api-keys", "platform.openai.com → API keys")} (на акаунті має бути поповнений баланс).</li>
+          <li>Додай у файл <code className="rounded bg-gray-100 px-1">.env.local</code> у корені проєкту:</li>
+        </ol>
+        <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs leading-relaxed text-gray-100">{`OPENAI_API_KEY=sk-...
+# необов'язково, за замовчуванням ${data?.openai.model && !data.openai.customModel ? data.openai.model : "gpt-5-mini"}
+OPENAI_MODEL=gpt-5-mini`}</pre>
+        <p>Перезапусти <code className="rounded bg-gray-100 px-1">npm run dev</code> (зміни в .env підхоплюються лише після перезапуску) і натисни «Перевірити ще раз».</p>
+      </Step>
     </>
   );
 }

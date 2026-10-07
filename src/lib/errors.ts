@@ -57,9 +57,9 @@ const KNOWN: Known[] = [
     hint: "Відкрий console.cloud.google.com → APIs & Services → Library → «Google Play Android Developer API» → Enable. Почекай пару хвилин.",
   },
   {
-    test: /This edit has already been (?:replaced|committed)|edit.*(?:expired|not found)/i,
+    test: /This edit has already been (?:replaced|committed)|edit has been deleted|edit.*(?:expired|not found)/i,
     message: "Сесія змін (edit) застаріла.",
-    hint: "Хтось змінив застосунок паралельно (або минуло багато часу). Почни крок спочатку.",
+    hint: "Google закрив сесію змін, бо застосунок змінювали паралельно (інша вкладка, Play Console) або минуло багато часу. Просто повтори дію; якщо це був майстер релізу — завантаж файл ще раз.",
   },
 ];
 

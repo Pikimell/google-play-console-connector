@@ -17,12 +17,12 @@ export function useApps() {
   return v;
 }
 
-type AppValue = Loadable<{ overview: AppOverview; saved: boolean }> & { pkg: string };
+type AppValue = Loadable<{ overview: AppOverview; hiddenTracks: string[]; saved: boolean }> & { pkg: string };
 const AppCtx = createContext<AppValue | null>(null);
 
 /** Дані поточного застосунку (треки, назва) — спільні для всіх його сторінок. */
 export function AppProvider({ pkg, children }: { pkg: string; children: ReactNode }) {
-  const value = useApi<{ overview: AppOverview; saved: boolean }>(`/api/apps/${encodeURIComponent(pkg)}`);
+  const value = useApi<{ overview: AppOverview; hiddenTracks: string[]; saved: boolean }>(`/api/apps/${encodeURIComponent(pkg)}`);
   return <AppCtx.Provider value={{ ...value, pkg }}>{children}</AppCtx.Provider>;
 }
 
