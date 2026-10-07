@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { Loader2, Trash2, Upload } from "lucide-react";
 import { useApp } from "@/components/apps-context";
 import { Button, Card, ErrorBox, PageHeader, Select, Skeleton, useToast } from "@/components/ui";
-import { api, enc, errorInfo, uploadWithProgress } from "@/lib/client";
+import { api, enc, errorInfo } from "@/lib/client";
 import { useApi } from "@/lib/hooks";
 import { languageName } from "@/lib/tracks";
 import type { ImageType, Listing, StoreImage } from "@/lib/types";
@@ -28,10 +28,10 @@ function ImageSection({ pkg, language, spec, images, onChanged }: { pkg: string;
   async function upload(files: FileList) {
     const list = [...files].slice(0, Math.max(1, spec.max - (spec.max === 1 ? 0 : images.length)));
     try {
-      for (const [i, f] of list.entries()) {
-        setBusy(`Завантаження ${i + 1}/${list.length}…`);
-        await uploadWithProgress(base, f, () => {}, f.type);
-      }
+      setBusy(`Завантаження ${list.length} шт.…`);
+      const form = new FormData();
+      for (const file of list) form.append("files", file);
+      await api(base, { method: "POST", body: form });
       toast("success", "Зображення завантажено");
       await onChanged();
     } catch (e) {
