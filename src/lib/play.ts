@@ -357,3 +357,29 @@ export async function setupClosedTesting(pkg: string, input: ClosedTestingInput)
     throw e;
   }
 }
+
+// ---------- «Видалення» тестування ----------
+
+/**
+ * Google Play API не вміє видаляти треки. Найближче до видалення:
+ * прибрати релізи з треку і відв'язати тестувальників — одним комітом.
+ */
+export async function retireTrack(pkg: string, track: string, opts: { halt: boolean; clearTesters: boolean }) {
+  if (!opts.halt && !opts.clearTesters) return { sentForReview: true };
+  return writeInEdit(pkg, async (editId, api) => {
+    if (opts.halt) {
+      const res = await api.edits.tracks.get({ packageName: pkg, editId, track });
+      if (res.data.releases?.length) {
+        // halted для completed потребує попереднього релізу й залишає його в роздачі.
+        // Порожній список прибирає всі збірки саме з цього треку, не видаляючи AAB.
+        await api.edits.tracks.update({ packageName: pkg, editId, track, requestBody: { track, releases: [] } });
+      }
+    }
+    if (opts.clearTesters) {
+      const testers = await api.edits.testers.get({ packageName: pkg, editId, track });
+      if (testers.data.googleGroups?.length) {
+        await api.edits.testers.update({ packageName: pkg, editId, track, requestBody: { googleGroups: [] } });
+      }
+    }
+  });
+}
