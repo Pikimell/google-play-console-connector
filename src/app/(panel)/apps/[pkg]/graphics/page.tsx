@@ -60,7 +60,7 @@ function ImageSection({ pkg, language, spec, images, onChanged }: { pkg: string;
       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="font-semibold">{spec.title} <span className="text-sm font-normal text-gray-400">{images.length}/{spec.max}</span></h2>
-          <p className="text-xs text-gray-500">{spec.spec}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{spec.spec}</p>
         </div>
         <Button
           size="sm"
@@ -78,8 +78,8 @@ function ImageSection({ pkg, language, spec, images, onChanged }: { pkg: string;
           {images.map((img) => (
             <div key={img.id} className="group relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`${img.url}=h${spec.wide ? 160 : 320}`} alt="" className={`rounded-lg border border-gray-200 object-cover ${spec.type === "icon" ? "size-24" : spec.wide ? "h-24" : "h-48"}`} />
-              <button onClick={() => remove(img.id)} className="absolute top-1.5 right-1.5 hidden rounded-md bg-white/90 p-1 text-red-600 shadow group-hover:block" aria-label="Видалити">
+              <img src={`${img.url}=h${spec.wide ? 160 : 320}`} alt="" className={`rounded-lg border border-gray-200 dark:border-gray-800 object-cover ${spec.type === "icon" ? "size-24" : spec.wide ? "h-24" : "h-48"}`} />
+              <button onClick={() => remove(img.id)} className="absolute top-1.5 right-1.5 hidden rounded-md bg-white/90 dark:bg-gray-900/90 p-1 text-red-600 dark:text-red-400 shadow group-hover:block" aria-label="Видалити">
                 <Trash2 className="size-4" />
               </button>
             </div>

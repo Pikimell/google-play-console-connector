@@ -80,7 +80,7 @@ export default function NewAppPage() {
     <>
       <PageHeader
         title={mode === "new" ? "Новий застосунок" : "Підключити наявний застосунок"}
-        back={<button onClick={() => { setMode(null); setStep(0); setError(undefined); }} className="mb-2 text-sm text-gray-500 hover:text-gray-800">← Змінити вибір</button>}
+        back={<button onClick={() => { setMode(null); setStep(0); setError(undefined); }} className="mb-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">← Змінити вибір</button>}
       />
       <Stepper steps={steps} current={step} />
 
@@ -91,10 +91,10 @@ export default function NewAppPage() {
             <Alert tone="info" className="mb-4">
               Google Play API <b>не дозволяє</b> створювати нові застосунки — це можна зробити лише вручну в Play Console. Це займає 1 хвилину, а все інше далі робиться звідси.
             </Alert>
-            <ol className="list-decimal space-y-2 pl-5 text-sm text-gray-700">
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-gray-700 dark:text-gray-300">
               <li>
                 Відкрий{" "}
-                <a className="font-medium text-brand-700 hover:underline" href="https://play.google.com/console/developers" target="_blank" rel="noreferrer">
+                <a className="font-medium text-brand-700 dark:text-emerald-300 hover:underline" href="https://play.google.com/console/developers" target="_blank" rel="noreferrer">
                   Play Console <ExternalLink className="inline size-3.5" />
                 </a>{" "}
                 і натисни <b>«Створити застосунок»</b>.
@@ -102,8 +102,8 @@ export default function NewAppPage() {
               <li>Вкажи назву, мову за замовчуванням, тип (застосунок / гра) і чи він безкоштовний.</li>
               <li>Підтверди декларації і натисни <b>«Створити застосунок»</b>.</li>
             </ol>
-            <p className="mt-4 text-sm text-gray-600">
-              Назву пакета (наприклад <code className="rounded bg-gray-100 px-1">com.mycompany.myapp</code>) Google зафіксує під час першого завантаження збірки — вона дорівнює <code className="rounded bg-gray-100 px-1">applicationId</code> у build.gradle.
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+              Назву пакета (наприклад <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">com.mycompany.myapp</code>) Google зафіксує під час першого завантаження збірки — вона дорівнює <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">applicationId</code> у build.gradle.
             </p>
             <WizardFooter>
               <Button onClick={() => setStep(1)}>Я створив застосунок →</Button>
@@ -114,10 +114,10 @@ export default function NewAppPage() {
         {mode === "new" && step === 1 && (
           <>
             <h2 className="mb-2 text-lg font-semibold">Перевір доступ сервісного акаунта</h2>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               Якщо при запрошенні сервісного акаунта ти дав йому права <b>на весь обліковий запис</b> (адміністратор) — новий застосунок уже доступний, просто йди далі.
             </p>
-            <p className="mt-2 text-sm text-gray-700">
+            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
               Якщо права видавались на окремі застосунки — відкрий Play Console → «Користувачі й дозволи» → сервісний акаунт → «Дозволи для застосунків» → додай новий застосунок.
             </p>
             <WizardFooter onBack={() => setStep(0)}>
@@ -155,24 +155,24 @@ export default function NewAppPage() {
               <AppIcon src={added.overview.iconUrl} name={added.overview.title || added.app.packageName} size={56} />
               <div>
                 <div className="flex items-center gap-2 text-lg font-semibold">
-                  <CheckCircle2 className="size-5 text-emerald-600" /> {added.overview.title || added.app.packageName} підключено
+                  <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400" /> {added.overview.title || added.app.packageName} підключено
                 </div>
-                <div className="font-mono text-sm text-gray-500">{added.app.packageName}</div>
+                <div className="font-mono text-sm text-gray-500 dark:text-gray-400">{added.app.packageName}</div>
               </div>
             </div>
 
             {mode === "new" && (
               <div className="mb-6">
                 <h3 className="mb-2 font-semibold">Що залишилось зробити в Play Console перед публікацією</h3>
-                <p className="mb-2 text-sm text-gray-600">
+                <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
                   Ці анкети Google дозволяє заповнити лише в Play Console (розділ «Панель» → «Налаштуйте застосунок»). Без них реліз можна зберегти лише як чернетку:
                 </p>
-                <ul className="grid gap-1 text-sm text-gray-700 sm:grid-cols-2">
+                <ul className="grid gap-1 text-sm text-gray-700 dark:text-gray-300 sm:grid-cols-2">
                   {CONSOLE_TASKS.map((t) => (
                     <li key={t} className="flex gap-2"><span className="text-gray-400">☐</span>{t}</li>
                   ))}
                 </ul>
-                <p className="mt-3 text-sm text-gray-600">Опис у магазині, графіку і контакти можна заповнити прямо тут, у панелі.</p>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">Опис у магазині, графіку і контакти можна заповнити прямо тут, у панелі.</p>
               </div>
             )}
 

@@ -59,7 +59,7 @@ export default function DetailsPage() {
             <Input value={v.contactWebsite} onChange={(e) => set({ contactWebsite: e.target.value })} placeholder="https://" />
           </Field>
           <ErrorBox error={saveError} />
-          <div className="flex justify-end gap-2 border-t border-gray-100 pt-4">
+          <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
             {form && <Button variant="ghost" onClick={() => setForm(null)}>Скасувати</Button>}
             <Button disabled={!form} loading={busy} onClick={save}>Зберегти в Google Play</Button>
           </div>

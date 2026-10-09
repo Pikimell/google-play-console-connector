@@ -29,7 +29,7 @@ function NavLink({ href, active, icon: Icon, children, onClick }: { href: string
       onClick={onClick}
       className={cn(
         "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition",
-        active ? "bg-brand-50 font-semibold text-brand-700" : "text-gray-700 hover:bg-gray-100",
+        active ? "bg-brand-50 dark:bg-brand-500/15 font-semibold text-brand-700 dark:text-emerald-300" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
       )}
     >
       <Icon className="size-4 shrink-0" />
@@ -55,8 +55,8 @@ export function Sidebar({ passwordEnabled }: { passwordEnabled: boolean }) {
           <Rocket className="size-4" />
         </span>
         <span className="leading-tight">
-          <span className="block text-sm font-semibold text-gray-900">Play Publisher</span>
-          <span className="block text-xs text-gray-500">керування Google Play</span>
+          <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">Play Publisher</span>
+          <span className="block text-xs text-gray-500 dark:text-gray-400">керування Google Play</span>
         </span>
       </Link>
 
@@ -67,8 +67,8 @@ export function Sidebar({ passwordEnabled }: { passwordEnabled: boolean }) {
 
       <div>
         <div className="mb-2 flex items-center justify-between px-3">
-          <span className="text-xs font-semibold tracking-wide text-gray-500 uppercase">Застосунки</span>
-          <Link href="/apps/new" onClick={close} className="rounded p-0.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800" title="Додати застосунок">
+          <span className="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">Застосунки</span>
+          <Link href="/apps/new" onClick={close} className="rounded p-0.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200" title="Додати застосунок">
             <Plus className="size-4" />
           </Link>
         </div>
@@ -81,16 +81,16 @@ export function Sidebar({ passwordEnabled }: { passwordEnabled: boolean }) {
                 <Link
                   href={base}
                   onClick={close}
-                  className={cn("flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition", active ? "bg-gray-100" : "hover:bg-gray-100")}
+                  className={cn("flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition", active ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-100 dark:hover:bg-gray-800")}
                 >
                   <AppIcon src={a.iconUrl} name={a.title || a.packageName} size={26} />
                   <span className="min-w-0">
-                    <span className={cn("block truncate", active ? "font-semibold text-gray-900" : "text-gray-800")}>{a.title || a.packageName}</span>
-                    {a.title && <span className="block truncate text-[11px] text-gray-500">{a.packageName}</span>}
+                    <span className={cn("block truncate", active ? "font-semibold text-gray-900 dark:text-gray-100" : "text-gray-800 dark:text-gray-200")}>{a.title || a.packageName}</span>
+                    {a.title && <span className="block truncate text-[11px] text-gray-500 dark:text-gray-400">{a.packageName}</span>}
                   </span>
                 </Link>
                 {active && (
-                  <div className="mt-1 mb-2 ml-4 space-y-0.5 border-l border-gray-200 pl-2">
+                  <div className="mt-1 mb-2 ml-4 space-y-0.5 border-l border-gray-200 dark:border-gray-800 pl-2">
                     {APP_NAV.map((n) => (
                       <NavLink key={n.href} href={base + n.href} active={currentSection === n.href} icon={n.icon} onClick={close}>
                         {n.label}
@@ -105,7 +105,7 @@ export function Sidebar({ passwordEnabled }: { passwordEnabled: boolean }) {
         </div>
       </div>
 
-      <div className="mt-auto space-y-1 border-t border-gray-100 pt-4">
+      <div className="mt-auto space-y-1 border-t border-gray-100 dark:border-gray-800 pt-4">
         <NavLink href="/setup" active={pathname === "/setup"} icon={Settings} onClick={close}>Підключення</NavLink>
         {passwordEnabled && (
           <button
@@ -113,7 +113,7 @@ export function Sidebar({ passwordEnabled }: { passwordEnabled: boolean }) {
               await fetch("/api/login", { method: "DELETE" });
               window.location.href = "/login";
             }}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <LogOut className="size-4" /> Вийти
           </button>
@@ -124,18 +124,18 @@ export function Sidebar({ passwordEnabled }: { passwordEnabled: boolean }) {
 
   return (
     <>
-      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 lg:hidden">
-        <button onClick={() => setOpen(true)} className="rounded-md p-1 text-gray-700 hover:bg-gray-100" aria-label="Меню">
+      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 lg:hidden">
+        <button onClick={() => setOpen(true)} className="rounded-md p-1 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Меню">
           <Menu className="size-5" />
         </button>
         <span className="text-sm font-semibold">Play Publisher</span>
       </div>
-      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-gray-200 bg-white lg:block">{nav}</aside>
+      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 lg:block">{nav}</aside>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-gray-900/40" onClick={close} />
-          <aside className="absolute inset-y-0 left-0 w-72 bg-white shadow-xl">
-            <button onClick={close} className="absolute top-4 right-3 rounded-md p-1 text-gray-500 hover:bg-gray-100" aria-label="Закрити">
+          <aside className="absolute inset-y-0 left-0 w-72 bg-white dark:bg-gray-900 shadow-xl">
+            <button onClick={close} className="absolute top-4 right-3 rounded-md p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Закрити">
               <X className="size-5" />
             </button>
             {nav}

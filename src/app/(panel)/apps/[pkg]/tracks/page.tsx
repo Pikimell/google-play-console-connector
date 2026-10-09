@@ -80,15 +80,15 @@ export default function TracksPage() {
             <Card key={t.track} className="p-5">
               <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <h2 className="font-semibold text-gray-900">{info.label}</h2>
-                  <p className="text-sm text-gray-500">{info.description}</p>
+                  <h2 className="font-semibold text-gray-900 dark:text-gray-100">{info.label}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{info.description}</p>
                 </div>
                 <LinkButton size="sm" variant="secondary" href={`/apps/${enc(pkg)}/release?track=${enc(t.track)}`}>Нова версія сюди</LinkButton>
               </div>
               {t.releases.length === 0 ? (
                 <p className="text-sm text-gray-400">Релізів немає.</p>
               ) : (
-                <div className="divide-y divide-gray-100 rounded-lg border border-gray-100">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-100 dark:border-gray-800">
                   {t.releases.map((r, i) => (
                     <div key={i} className="flex flex-wrap items-center gap-3 p-3">
                       <div className="min-w-0 flex-1">
@@ -99,8 +99,8 @@ export default function TracksPage() {
                             {r.userFraction ? ` · ${Math.round(r.userFraction * 100)}%` : ""}
                           </Badge>
                         </div>
-                        <div className="text-xs text-gray-500">versionCode {r.versionCodes.join(", ") || "—"}</div>
-                        {r.releaseNotes?.[0]?.text && <p className="mt-1 line-clamp-2 text-sm text-gray-600">{r.releaseNotes[0].text}</p>}
+                        <div className="text-xs text-gray-500 dark:text-gray-400">versionCode {r.versionCodes.join(", ") || "—"}</div>
+                        {r.releaseNotes?.[0]?.text && <p className="mt-1 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">{r.releaseNotes[0].text}</p>}
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {r.status === "inProgress" && (
@@ -157,10 +157,10 @@ export default function TracksPage() {
             <input type="range" min={1} max={99} value={fraction.percent} onChange={(e) => setFraction({ ...fraction, percent: Number(e.target.value) })} className="w-full accent-brand-600" />
             <div className="mt-2 flex gap-2">
               {[5, 10, 20, 50, 80].map((p) => (
-                <button key={p} type="button" onClick={() => setFraction({ ...fraction, percent: p })} className="rounded-full border border-gray-300 px-2.5 py-0.5 text-xs hover:border-brand-500">{p}%</button>
+                <button key={p} type="button" onClick={() => setFraction({ ...fraction, percent: p })} className="rounded-full border border-gray-300 dark:border-gray-700 px-2.5 py-0.5 text-xs hover:border-brand-500">{p}%</button>
               ))}
             </div>
-            <p className="mt-3 text-xs text-gray-500">Зменшити відсоток Google не дозволяє — лише збільшити або призупинити.</p>
+            <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">Зменшити відсоток Google не дозволяє — лише збільшити або призупинити.</p>
             <ErrorBox error={modalError} className="mt-3" />
           </>
         )}
@@ -179,7 +179,7 @@ export default function TracksPage() {
       >
         {promote && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               <b>{promote.release.name || `code ${promote.release.versionCodes.join(", ")}`}</b> з «{trackInfo(promote.from).label}». Назва релізу та «Що нового» скопіюються.
             </p>
             <Select value={target} onChange={(e) => setTarget(e.target.value)}>

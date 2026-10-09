@@ -10,15 +10,15 @@ function AppHeader() {
   const o = data?.overview ?? (stored ? { title: stored.title, iconUrl: stored.iconUrl } : undefined);
   return (
     <>
-    <div className="mb-6 flex items-center gap-3 border-b border-gray-200 pb-4">
+    <div className="mb-6 flex items-center gap-3 border-b border-gray-200 dark:border-gray-800 pb-4">
       {loading && !o ? (
         <Skeleton className="size-10" />
       ) : (
         <AppIcon src={o?.iconUrl} name={o?.title || pkg} size={40} />
       )}
       <div className="min-w-0 flex-1">
-        <div className="truncate font-semibold text-gray-900">{o?.title || (loading ? "…" : pkg)}</div>
-        <div className="truncate font-mono text-xs text-gray-500">{pkg}</div>
+        <div className="truncate font-semibold text-gray-900 dark:text-gray-100">{o?.title || (loading ? "…" : pkg)}</div>
+        <div className="truncate font-mono text-xs text-gray-500 dark:text-gray-400">{pkg}</div>
       </div>
       <CopyButton text={pkg} label="Пакет" variant="ghost" />
     </div>

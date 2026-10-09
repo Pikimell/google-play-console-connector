@@ -92,7 +92,7 @@ export default function TestingPage() {
 
       <Card className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 p-4">
         <span className="text-sm font-medium">Посилання для тестувальників:</span>
-        <code className="rounded bg-gray-100 px-2 py-1 text-sm break-all">{optInLink(pkg)}</code>
+        <code className="rounded bg-gray-100 dark:bg-gray-800 px-2 py-1 text-sm break-all">{optInLink(pkg)}</code>
         <CopyButton text={optInLink(pkg)} />
       </Card>
 
@@ -103,11 +103,11 @@ export default function TestingPage() {
             onClick={() => setTab(t.key)}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition",
-              tab === t.key ? "border-brand-600 bg-brand-50 font-medium text-brand-700" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
+              tab === t.key ? "border-brand-600 bg-brand-50 dark:bg-brand-500/15 font-medium text-brand-700 dark:text-emerald-300" : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-950",
             )}
           >
             {t.label}
-            <span className={cn("rounded-full px-1.5 text-xs", tab === t.key ? "bg-brand-100" : "bg-gray-100")}>{groups[t.key].length}</span>
+            <span className={cn("rounded-full px-1.5 text-xs", tab === t.key ? "bg-brand-100 dark:bg-brand-500/25" : "bg-gray-100 dark:bg-gray-800")}>{groups[t.key].length}</span>
           </button>
         ))}
       </div>
@@ -120,7 +120,7 @@ export default function TestingPage() {
             {groups.inactive.length > 0 ? `Є ${groups.inactive.length} без збірки або зупинених — див. сусідню вкладку.` : "Майстер проведе через 3 кроки: назва → тестувальники → збірка."}
           </EmptyState>
         ) : (
-          <p className="py-8 text-center text-sm text-gray-500">{tab === "hidden" ? "Видалених тестувань немає." : "Тут порожньо."}</p>
+          <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">{tab === "hidden" ? "Видалених тестувань немає." : "Тут порожньо."}</p>
         )
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
@@ -129,7 +129,7 @@ export default function TestingPage() {
             return (
               <Card key={t.track} className={cn("flex flex-col p-4", tab === "hidden" && "opacity-75")}>
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <Link href={`${base}/testing/${enc(t.track)}`} className="min-w-0 truncate font-semibold text-gray-900 hover:text-brand-700">
+                  <Link href={`${base}/testing/${enc(t.track)}`} className="min-w-0 truncate font-semibold text-gray-900 dark:text-gray-100 hover:text-brand-700 dark:hover:text-emerald-300">
                     {t.track === "alpha" ? trackInfo(t.track).label : t.track}
                   </Link>
                   <div className="flex shrink-0 items-center gap-1">
@@ -137,7 +137,7 @@ export default function TestingPage() {
                     {tab !== "hidden" && (
                       <button
                         onClick={() => openRemove(t)}
-                        className="-mr-1 rounded-md p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                        className="-mr-1 rounded-md p-1.5 text-gray-400 transition hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
                         title="Видалити тестування"
                         aria-label="Видалити тестування"
                       >
@@ -146,7 +146,7 @@ export default function TestingPage() {
                     )}
                   </div>
                 </div>
-                <p className="flex-1 text-sm text-gray-600">{r ? `${r.name || "Без назви"} · code ${r.versionCodes.join(", ")}` : "Ще немає версії для тестувальників."}</p>
+                <p className="flex-1 text-sm text-gray-600 dark:text-gray-400">{r ? `${r.name || "Без назви"} · code ${r.versionCodes.join(", ")}` : "Ще немає версії для тестувальників."}</p>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   {tab === "hidden" ? (
                     <Button size="sm" variant="secondary" loading={busy === t.track} icon={<Eye className="size-3.5" />} onClick={() => setHidden(t, false)}>Повернути</Button>
@@ -184,10 +184,10 @@ export default function TestingPage() {
       >
         {removing && (
           <div className="space-y-3 text-sm">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Google Play не дозволяє повністю видаляти треки, тому панель зробить усе, що можна, і прибере тестування зі списку:
             </p>
-            <div className="rounded-xl border border-gray-200 p-1">
+            <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-1">
               {isActive(removing) && (
                 <Checkbox
                   checked={halt}
@@ -198,7 +198,7 @@ export default function TestingPage() {
               )}
               <Checkbox checked={clearTesters} onChange={setClearTesters} label="Відв'язати тестувальників (Google-групи)" description="Email-списки, додані вручну в Play Console, залишаться — їх Google через API не показує." />
             </div>
-            <p className="text-xs text-gray-500">Повернути тестування можна у вкладці «Видалені» (збірку потім опублікуй заново через «Нова версія»).</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Повернути тестування можна у вкладці «Видалені» (збірку потім опублікуй заново через «Нова версія»).</p>
             <ErrorBox error={error} />
             {error && (
               <Button size="sm" variant="secondary" onClick={() => setHidden(removing, true)}>Лише прибрати зі списку, нічого не змінюючи в Google Play</Button>

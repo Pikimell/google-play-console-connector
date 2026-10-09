@@ -96,9 +96,9 @@ function ReleaseWizard() {
     const testing = info?.kind === "closed" || info?.kind === "open" || info?.kind === "internal";
     return (
       <Card className="max-w-3xl p-8">
-        <CheckCircle2 className="mb-3 size-12 text-emerald-600" />
+        <CheckCircle2 className="mb-3 size-12 text-emerald-600 dark:text-emerald-400" />
         <h2 className="text-xl font-semibold">{effectiveStatus === "draft" ? "Чернетку релізу збережено" : "Реліз створено!"}</h2>
-        <p className="mt-1 text-gray-600">
+        <p className="mt-1 text-gray-600 dark:text-gray-400">
           versionCode {versionCode} → <b>{info?.label}</b> · {STATUS_LABEL[effectiveStatus]}
           {effectiveStatus === "inProgress" && ` (${percent}%)`}
         </p>
@@ -115,13 +115,13 @@ function ReleaseWizard() {
             </Alert>
           )}
           {testing && info?.kind !== "internal" && (
-            <div className="rounded-xl border border-gray-200 p-4">
+            <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
               <div className="mb-1 text-sm font-medium">Посилання для тестувальників</div>
               <div className="flex flex-wrap items-center gap-2">
-                <code className="rounded bg-gray-100 px-2 py-1 text-sm break-all">{optInLink(pkg)}</code>
+                <code className="rounded bg-gray-100 dark:bg-gray-800 px-2 py-1 text-sm break-all">{optInLink(pkg)}</code>
                 <CopyButton text={optInLink(pkg)} />
               </div>
-              <p className="mt-2 text-xs text-gray-500">Тестувальник відкриває посилання з того Google-акаунта, який є у списку, натискає «Стати тестувальником» і встановлює застосунок з Google Play.</p>
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Тестувальник відкриває посилання з того Google-акаунта, який є у списку, натискає «Стати тестувальником» і встановлює застосунок з Google Play.</p>
             </div>
           )}
         </div>
@@ -160,7 +160,7 @@ function ReleaseWizard() {
         {step === 1 && (
           <>
             <h2 className="mb-1 text-lg font-semibold">Куди публікуємо?</h2>
-            <p className="mb-4 text-sm text-gray-600">Зазвичай шлях такий: внутрішнє → закрите → (відкрите) → робоча версія.</p>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">Зазвичай шлях такий: внутрішнє → закрите → (відкрите) → робоча версія.</p>
             <div className="space-y-2">
               {trackList.map((t) => {
                 const ti = trackInfo(t.track);
@@ -179,9 +179,9 @@ function ReleaseWizard() {
                 );
               })}
             </div>
-            <p className="mt-3 text-sm text-gray-500">
+            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
               Потрібен окремий трек закритого тестування (наприклад для клієнта)?{" "}
-              <a className="font-medium text-brand-700 hover:underline" href={`/apps/${enc(pkg)}/testing/new`}>
+              <a className="font-medium text-brand-700 dark:text-emerald-300 hover:underline" href={`/apps/${enc(pkg)}/testing/new`}>
                 <FlaskConical className="inline size-3.5" /> Створити
               </a>
             </p>
@@ -200,7 +200,7 @@ function ReleaseWizard() {
               </Field>
               <ReleaseNotesEditor value={releaseNotes} onChange={setNotes} />
               <div>
-                <div className="mb-2 text-sm font-medium text-gray-800">Як публікувати</div>
+                <div className="mb-2 text-sm font-medium text-gray-800 dark:text-gray-200">Як публікувати</div>
                 <div className="space-y-2">
                   <ChoiceCard selected={effectiveStatus === "completed"} onClick={() => setStatus("completed")} title="Опублікувати одразу" description={info?.kind === "production" ? "Для всіх користувачів після перевірки Google" : "Для всіх тестувальників цього треку"} />
                   {info?.kind === "production" && (
@@ -209,12 +209,12 @@ function ReleaseWizard() {
                   <ChoiceCard selected={effectiveStatus === "draft"} onClick={() => setStatus("draft")} title="Зберегти як чернетку" description="Нічого не публікується. Обов'язково для застосунків, які ще ні разу не публікувались." />
                 </div>
                 {effectiveStatus === "inProgress" && (
-                  <div className="mt-4 rounded-xl bg-gray-50 p-4">
+                  <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-950 p-4">
                     <div className="mb-2 flex justify-between text-sm"><span>Частка користувачів</span><b>{percent}%</b></div>
                     <input type="range" min={1} max={99} value={percent} onChange={(e) => setPercent(Number(e.target.value))} className="w-full accent-brand-600" />
                     <div className="mt-2 flex gap-2">
                       {[1, 5, 10, 20, 50].map((p) => (
-                        <button key={p} type="button" onClick={() => setPercent(p)} className="rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-xs hover:border-brand-500">{p}%</button>
+                        <button key={p} type="button" onClick={() => setPercent(p)} className="rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2.5 py-0.5 text-xs hover:border-brand-500">{p}%</button>
                       ))}
                     </div>
                   </div>
@@ -230,7 +230,7 @@ function ReleaseWizard() {
         {step === 3 && (
           <>
             <h2 className="mb-4 text-lg font-semibold">Перевір і публікуй</h2>
-            <dl className="divide-y divide-gray-100 rounded-xl border border-gray-200 text-sm">
+            <dl className="divide-y divide-gray-100 dark:divide-gray-800 rounded-xl border border-gray-200 dark:border-gray-800 text-sm">
               {[
                 ["Застосунок", overview?.title ? `${overview.title} (${pkg})` : pkg],
                 ["Збірка", `versionCode ${versionCode}${uploaded && source === "upload" ? ` · ${uploaded.fileName}` : ""}`],
@@ -239,20 +239,20 @@ function ReleaseWizard() {
                 ["Публікація", `${STATUS_LABEL[effectiveStatus]}${effectiveStatus === "inProgress" ? ` · ${percent}%` : ""}`],
               ].map(([k, v]) => (
                 <div key={k} className="flex gap-4 px-4 py-2.5">
-                  <dt className="w-36 shrink-0 text-gray-500">{k}</dt>
-                  <dd className="min-w-0 font-medium break-words text-gray-900">{v}</dd>
+                  <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">{k}</dt>
+                  <dd className="min-w-0 font-medium break-words text-gray-900 dark:text-gray-100">{v}</dd>
                 </div>
               ))}
               <div className="flex gap-4 px-4 py-2.5">
-                <dt className="w-36 shrink-0 text-gray-500">Що нового</dt>
+                <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">Що нового</dt>
                 <dd className="min-w-0 space-y-2">
                   {releaseNotes.filter((n) => n.text.trim()).length === 0 ? (
-                    <span className="text-amber-700">не заповнено</span>
+                    <span className="text-amber-700 dark:text-amber-300">не заповнено</span>
                   ) : (
                     releaseNotes.filter((n) => n.text.trim()).map((n) => (
                       <div key={n.language}>
                         <Badge>{n.language}</Badge>
-                        <p className="mt-1 whitespace-pre-line text-gray-800">{n.text}</p>
+                        <p className="mt-1 whitespace-pre-line text-gray-800 dark:text-gray-200">{n.text}</p>
                       </div>
                     ))
                   )}

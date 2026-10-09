@@ -43,11 +43,11 @@ export default function Dashboard() {
           const href = a.href.replace("{pkg}", enc(first ?? ""));
           const body = (
             <Card className={`h-full p-4 transition ${disabled ? "opacity-50" : "hover:border-brand-500 hover:shadow-md"}`}>
-              <span className="mb-3 flex size-9 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+              <span className="mb-3 flex size-9 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-500/15 text-brand-700 dark:text-emerald-300">
                 <a.icon className="size-5" />
               </span>
-              <div className="font-semibold text-gray-900">{a.title}</div>
-              <div className="mt-1 text-sm text-gray-500">{a.text}</div>
+              <div className="font-semibold text-gray-900 dark:text-gray-100">{a.title}</div>
+              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">{a.text}</div>
               {a.needsApp && apps.length > 1 && <div className="mt-2 text-xs text-gray-400">Для: {apps[0].title || first} (або вибери застосунок нижче)</div>}
             </Card>
           );
@@ -79,10 +79,10 @@ export default function Dashboard() {
                 <Link href={base} className="group flex items-center gap-3">
                   <AppIcon src={a.iconUrl} name={a.title || a.packageName} size={48} />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold text-gray-900 group-hover:text-brand-700">{a.title || a.packageName}</div>
-                    <div className="truncate font-mono text-xs text-gray-500">{a.packageName}</div>
+                    <div className="truncate font-semibold text-gray-900 dark:text-gray-100 group-hover:text-brand-700 dark:group-hover:text-emerald-300">{a.title || a.packageName}</div>
+                    <div className="truncate font-mono text-xs text-gray-500 dark:text-gray-400">{a.packageName}</div>
                   </div>
-                  <ArrowRight className="size-4 text-gray-400 group-hover:text-brand-600" />
+                  <ArrowRight className="size-4 text-gray-400 group-hover:text-brand-600 dark:group-hover:text-emerald-400" />
                 </Link>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <LinkButton href={`${base}/release`} size="sm" icon={<Rocket className="size-4" />}>Нова версія</LinkButton>

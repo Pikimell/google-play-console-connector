@@ -16,19 +16,19 @@ function Step({ n, state, title, children }: { n: number; state: "ok" | "fail" |
   return (
     <Card className="flex gap-4 p-5">
       <div className="pt-0.5">
-        {state === "ok" ? <CheckCircle2 className="size-6 text-emerald-600" /> : state === "fail" ? <XCircle className="size-6 text-red-600" /> : <Circle className="size-6 text-gray-300" />}
+        {state === "ok" ? <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400" /> : state === "fail" ? <XCircle className="size-6 text-red-600 dark:text-red-400" /> : <Circle className="size-6 text-gray-300 dark:text-gray-600" />}
       </div>
       <div className="min-w-0 flex-1">
         <div className="mb-1 text-xs font-semibold tracking-wide text-gray-400 uppercase">Крок {n}</div>
-        <h3 className={cn("mb-2 font-semibold", state === "fail" ? "text-red-800" : "text-gray-900")}>{title}</h3>
-        <div className="space-y-2 text-sm leading-relaxed text-gray-700">{children}</div>
+        <h3 className={cn("mb-2 font-semibold", state === "fail" ? "text-red-800 dark:text-red-300" : "text-gray-900 dark:text-gray-100")}>{title}</h3>
+        <div className="space-y-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">{children}</div>
       </div>
     </Card>
   );
 }
 
 const ext = (href: string, text: string) => (
-  <a href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-brand-700 hover:underline">
+  <a href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-brand-700 dark:text-emerald-300 hover:underline">
     {text} <ExternalLink className="size-3.5" />
   </a>
 );
@@ -59,7 +59,7 @@ export default function SetupPage() {
               <Alert tone="error" title="Ключ не знайдено">{c?.error}</Alert>
               <p>Поклади завантажений JSON-файл у папку проєкту ось так:</p>
               <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs text-gray-100">credentials/service-account.json</pre>
-              <p>Після цього перезапусти <code className="rounded bg-gray-100 px-1">npm run dev</code> і натисни «Перевірити ще раз».</p>
+              <p>Після цього перезапусти <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">npm run dev</code> і натисни «Перевірити ще раз».</p>
             </>
           )}
         </Step>
@@ -67,12 +67,12 @@ export default function SetupPage() {
         <Step n={2} state="todo" title="Увімкнути Google Play Android Developer API">
           <p>У Google Cloud проєкті, де створений сервісний акаунт, має бути увімкнений цей API.</p>
           <p>{ext(`https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com${c?.projectId ? `?project=${c.projectId}` : ""}`, "Відкрити сторінку API і натиснути «Enable»")}</p>
-          <p className="text-gray-500">Якщо вже увімкнено — просто пропусти цей крок.</p>
+          <p className="text-gray-500 dark:text-gray-400">Якщо вже увімкнено — просто пропусти цей крок.</p>
         </Step>
 
         <Step n={3} state={data && data.appsCount > 0 ? "ok" : "todo"} title="Дати сервісному акаунту доступ у Play Console">
           {email && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-gray-50 p-3">
+            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-950 p-3">
               <code className="font-mono text-sm break-all">{email}</code>
               <CopyButton text={email} />
             </div>
@@ -86,7 +86,7 @@ export default function SetupPage() {
             </li>
             <li>Натисни «Запросити» — підтверджувати нічого не потрібно.</li>
           </ol>
-          <p className="text-gray-500">Права інколи починають діяти через кілька хвилин (зрідка — до доби).</p>
+          <p className="text-gray-500 dark:text-gray-400">Права інколи починають діяти через кілька хвилин (зрідка — до доби).</p>
         </Step>
 
         <Step n={4} state={data && data.appsCount > 0 ? "ok" : "todo"} title="Додати застосунки в панель">
@@ -94,7 +94,7 @@ export default function SetupPage() {
             {data?.appsCount ? <>Додано застосунків: <Badge tone="green">{data.appsCount}</Badge>. </> : null}
             Вкажи назву пакета — панель перевірить доступ і запам&apos;ятає застосунок.
           </p>
-          <Link href="/apps/new" className="font-medium text-brand-700 hover:underline">Додати застосунок →</Link>
+          <Link href="/apps/new" className="font-medium text-brand-700 dark:text-emerald-300 hover:underline">Додати застосунок →</Link>
         </Step>
 
         <Step n={5} state={data?.passwordEnabled ? "ok" : "todo"} title="Пароль на панель (рекомендовано)">
@@ -102,7 +102,7 @@ export default function SetupPage() {
             <p>Пароль увімкнено. Панель захищена.</p>
           ) : (
             <>
-              <p>Зараз панель відкрита без пароля. Для локального запуску це нормально, але якщо розгортатимеш її на сервері — обов&apos;язково додай у файл <code className="rounded bg-gray-100 px-1">.env.local</code>:</p>
+              <p>Зараз панель відкрита без пароля. Для локального запуску це нормально, але якщо розгортатимеш її на сервері — обов&apos;язково додай у файл <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">.env.local</code>:</p>
               <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs text-gray-100">ADMIN_PASSWORD=придумай-надійний-пароль</pre>
             </>
           )}
@@ -110,13 +110,13 @@ export default function SetupPage() {
       </div>
 
       <h2 className="mt-10 mb-1 text-lg font-semibold">Додатково: OpenAI для автоматичного перекладу</h2>
-      <p className="mb-4 text-sm text-gray-600">Потрібно лише для сторінки «Локалізація» — перекладу опису в магазині на інші мови.</p>
+      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">Потрібно лише для сторінки «Локалізація» — перекладу опису в магазині на інші мови.</p>
       <Step n={6} state={data?.openai.ok ? "ok" : data?.openai.configured && data.openai.ok === false ? "fail" : "todo"} title="Підключити OpenAI (ChatGPT)">
         {data?.openai.configured ? (
           data.openai.ok ? (
             <p>
               Підключено. Модель: <Badge tone="green">{data.openai.model}</Badge>
-              {!data.openai.customModel && <span className="text-gray-500"> (за замовчуванням — дешева й якісна для перекладів)</span>}
+              {!data.openai.customModel && <span className="text-gray-500 dark:text-gray-400"> (за замовчуванням — дешева й якісна для перекладів)</span>}
             </p>
           ) : (
             <Alert tone="error" title={data.openai.error ?? "OpenAI недоступний"}>{data.openai.hint}</Alert>
@@ -126,12 +126,12 @@ export default function SetupPage() {
         )}
         <ol className="list-decimal space-y-1 pl-5">
           <li>Створи API-ключ: {ext("https://platform.openai.com/api-keys", "platform.openai.com → API keys")} (на акаунті має бути поповнений баланс).</li>
-          <li>Додай у файл <code className="rounded bg-gray-100 px-1">.env.local</code> у корені проєкту:</li>
+          <li>Додай у файл <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">.env.local</code> у корені проєкту:</li>
         </ol>
         <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs leading-relaxed text-gray-100">{`OPENAI_API_KEY=sk-...
 # необов'язково, за замовчуванням ${data?.openai.model && !data.openai.customModel ? data.openai.model : "gpt-5-mini"}
 OPENAI_MODEL=gpt-5-mini`}</pre>
-        <p>Перезапусти <code className="rounded bg-gray-100 px-1">npm run dev</code> (зміни в .env підхоплюються лише після перезапуску) і натисни «Перевірити ще раз».</p>
+        <p>Перезапусти <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">npm run dev</code> (зміни в .env підхоплюються лише після перезапуску) і натисни «Перевірити ще раз».</p>
       </Step>
     </>
   );

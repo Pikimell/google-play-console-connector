@@ -44,12 +44,12 @@ export function BasePlanSummary({ plan }: { plan: BasePlan }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-mono text-sm font-medium">{plan.basePlanId}</span>
         <Badge tone={state.tone}>{state.label}</Badge>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
           {plan.kind === "prepaid" ? "передплачений" : plan.kind === "installments" ? "розстрочка" : "автопродовження"}
           {plan.period && ` · ${PERIOD_LABEL[plan.period] ?? plan.period}`}
         </span>
       </div>
-      <div className="mt-1 text-xs text-gray-600">
+      <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
         {shown.length ? shown.map((p) => `${p.region}: ${formatPrice(p.amount, p.currency)}`).join(" · ") : "ціни не задані"}
         {plan.prices.length > shown.length && <span className="text-gray-400"> · ще {plan.prices.length - shown.length} регіонів</span>}
       </div>
@@ -109,11 +109,11 @@ export function PricePreview({ pkg, price }: { pkg: string; price: PriceInput })
       </Button>
       <ErrorBox error={error} />
       {shown && (
-        <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs">
+        <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-3 text-xs">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3">
             {[...keyPrices(shown), ...shown.filter((p) => !keyPrices(shown).includes(p))].map((p) => (
               <span key={p.region} className="flex justify-between gap-2">
-                <span className="text-gray-500">{p.region}</span>
+                <span className="text-gray-500 dark:text-gray-400">{p.region}</span>
                 <span className="tabular-nums">{formatPrice(p.amount, p.currency)}</span>
               </span>
             ))}
@@ -184,7 +184,7 @@ export function ListingFields({ value, onChange }: { value: SubscriptionListing;
         <Textarea rows={2} value={value.description ?? ""} onChange={(e) => set({ description: e.target.value })} />
       </Field>
       <div>
-        <div className="mb-1.5 text-sm font-medium text-gray-800">Переваги <span className="font-normal text-gray-500">(до 4, по 40 символів)</span></div>
+        <div className="mb-1.5 text-sm font-medium text-gray-800 dark:text-gray-200">Переваги <span className="font-normal text-gray-500 dark:text-gray-400">(до 4, по 40 символів)</span></div>
         <div className="space-y-2">
           {benefits.map((b, i) => (
             <div key={i} className="flex gap-2">

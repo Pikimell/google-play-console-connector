@@ -17,19 +17,19 @@ function TrackCard({ pkg, t }: { pkg: string; t: Track }) {
     <Card className="flex flex-col p-4">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <div className="font-semibold text-gray-900">{info.label}</div>
+          <div className="font-semibold text-gray-900 dark:text-gray-100">{info.label}</div>
           <div className="font-mono text-xs text-gray-400">{t.track}</div>
         </div>
         {r ? <Badge tone={STATUS_TONE[r.status]}>{STATUS_LABEL[r.status]}{r.status === "inProgress" && r.userFraction ? ` · ${Math.round(r.userFraction * 100)}%` : ""}</Badge> : <Badge>Порожньо</Badge>}
       </div>
       {r ? (
         <div className="flex-1 text-sm">
-          <div className="text-gray-900">{r.name || "Без назви"} <span className="text-gray-500">· code {r.versionCodes.join(", ")}</span></div>
-          {note && <p className="mt-1 line-clamp-2 text-gray-500">{note}</p>}
+          <div className="text-gray-900 dark:text-gray-100">{r.name || "Без назви"} <span className="text-gray-500 dark:text-gray-400">· code {r.versionCodes.join(", ")}</span></div>
+          {note && <p className="mt-1 line-clamp-2 text-gray-500 dark:text-gray-400">{note}</p>}
           {t.releases.length > 1 && <p className="mt-1 text-xs text-gray-400">+ ще {t.releases.length - 1} реліз(и) на треку</p>}
         </div>
       ) : (
-        <p className="flex-1 text-sm text-gray-500">На цьому треку ще немає релізів.</p>
+        <p className="flex-1 text-sm text-gray-500 dark:text-gray-400">На цьому треку ще немає релізів.</p>
       )}
       <div className="mt-4 flex flex-wrap gap-2">
         <LinkButton size="sm" variant="secondary" href={`${base}/release?track=${enc(t.track)}`} icon={<Rocket className="size-3.5" />}>Нова версія сюди</LinkButton>
@@ -101,10 +101,10 @@ export default function OverviewPage() {
           </div>
           {empty.length > 0 && (
             <div className="mt-6">
-              <h2 className="mb-2 text-sm font-semibold text-gray-500">Порожні треки</h2>
+              <h2 className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">Порожні треки</h2>
               <div className="flex flex-wrap gap-2">
                 {empty.map((t) => (
-                  <Link key={t.track} href={`${base}/release?track=${enc(t.track)}`} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-sm text-gray-700 hover:border-brand-500">
+                  <Link key={t.track} href={`${base}/release?track=${enc(t.track)}`} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:border-brand-500">
                     {trackInfo(t.track).short} <Plus className="size-3.5 text-gray-400" />
                   </Link>
                 ))}
@@ -112,16 +112,16 @@ export default function OverviewPage() {
             </div>
           )}
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            <Link href={`${base}/tracks`} className="group"><Card className="flex items-center gap-3 p-4 group-hover:border-brand-500"><Layers className="size-5 text-brand-600" /><span className="flex-1 text-sm font-medium">Керувати релізами</span><ArrowRight className="size-4 text-gray-400" /></Card></Link>
-            <Link href={`${base}/testing`} className="group"><Card className="flex items-center gap-3 p-4 group-hover:border-brand-500"><FlaskConical className="size-5 text-brand-600" /><span className="flex-1 text-sm font-medium">Закрите тестування</span><ArrowRight className="size-4 text-gray-400" /></Card></Link>
-            <Link href={`${base}/listing`} className="group"><Card className="flex items-center gap-3 p-4 group-hover:border-brand-500"><Users className="size-5 text-brand-600" /><span className="flex-1 text-sm font-medium">Опис у магазині</span><ArrowRight className="size-4 text-gray-400" /></Card></Link>
+            <Link href={`${base}/tracks`} className="group"><Card className="flex items-center gap-3 p-4 group-hover:border-brand-500"><Layers className="size-5 text-brand-600 dark:text-emerald-400" /><span className="flex-1 text-sm font-medium">Керувати релізами</span><ArrowRight className="size-4 text-gray-400" /></Card></Link>
+            <Link href={`${base}/testing`} className="group"><Card className="flex items-center gap-3 p-4 group-hover:border-brand-500"><FlaskConical className="size-5 text-brand-600 dark:text-emerald-400" /><span className="flex-1 text-sm font-medium">Закрите тестування</span><ArrowRight className="size-4 text-gray-400" /></Card></Link>
+            <Link href={`${base}/listing`} className="group"><Card className="flex items-center gap-3 p-4 group-hover:border-brand-500"><Users className="size-5 text-brand-600 dark:text-emerald-400" /><span className="flex-1 text-sm font-medium">Опис у магазині</span><ArrowRight className="size-4 text-gray-400" /></Card></Link>
           </div>
         </>
       ) : null}
 
       {data?.saved && (
-        <div className="mt-12 border-t border-gray-200 pt-4">
-          <Button variant="ghost" size="sm" onClick={remove} className="text-gray-500">Прибрати застосунок з панелі</Button>
+        <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-4">
+          <Button variant="ghost" size="sm" onClick={remove} className="text-gray-500 dark:text-gray-400">Прибрати застосунок з панелі</Button>
         </div>
       )}
     </>

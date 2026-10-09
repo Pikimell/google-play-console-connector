@@ -26,11 +26,11 @@ export function CsvButton({ name, emails, label = "CSV для Play Console" }: {
 /** Пояснення, чому потрібна Google-група, і як її зробити за 2 хвилини. */
 export function GoogleGroupGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
   return (
-    <details open={defaultOpen} className="group rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-950">
+    <details open={defaultOpen} className="group rounded-xl border border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 p-4 text-sm text-sky-950 dark:text-sky-200">
       <summary className="flex cursor-pointer list-none items-center gap-2 font-semibold">
-        <HelpCircle className="size-4 text-sky-600" />
+        <HelpCircle className="size-4 text-sky-600 dark:text-sky-400" />
         Як працюють тестувальники і навіщо Google-група
-        <span className="ml-auto text-xs font-normal text-sky-700 group-open:hidden">показати</span>
+        <span className="ml-auto text-xs font-normal text-sky-700 dark:text-sky-300 group-open:hidden">показати</span>
       </summary>
       <div className="mt-3 space-y-3 leading-relaxed">
         <p>
@@ -100,8 +100,8 @@ export function TesterGroupForm({ initial, onSaved, onCancel, submitLabel = "З�
         <Textarea rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder={"ivan@gmail.com\nolena@gmail.com, petro@company.com"} className="font-mono text-xs" />
       </Field>
       <div className="flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Розпізнано: {parsed.valid.length}</span>
-        {parsed.invalid.length > 0 && <span className="rounded-full bg-red-50 px-2 py-0.5 font-medium text-red-700">Некоректні: {parsed.invalid.join(", ")}</span>}
+        <span className="rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-700 dark:text-emerald-300">Розпізнано: {parsed.valid.length}</span>
+        {parsed.invalid.length > 0 && <span className="rounded-full bg-red-50 dark:bg-red-500/10 px-2 py-0.5 font-medium text-red-700 dark:text-red-300">Некоректні: {parsed.invalid.join(", ")}</span>}
       </div>
       <Field label="Email Google-групи (необов'язково, але дуже бажано)" hint="Наприклад myapp-testers@googlegroups.com. Саме її панель прив'язує до треку тестування через API.">
         <Input value={googleGroup} onChange={(e) => setGoogleGroup(e.target.value)} placeholder="myapp-testers@googlegroups.com" className="font-mono" />

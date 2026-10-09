@@ -4,7 +4,7 @@ export function AppIcon({ src, name, size = 40, className }: { src?: string; nam
   const letter = (name || "?").trim().charAt(0).toUpperCase();
   if (src) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={`${src}=s${size * 2}`} alt="" width={size} height={size} className={cn("shrink-0 rounded-[22%] bg-gray-100 object-cover", className)} style={{ width: size, height: size }} />;
+    return <img src={`${src}=s${size * 2}`} alt="" width={size} height={size} className={cn("shrink-0 rounded-[22%] bg-gray-100 dark:bg-gray-800 object-cover", className)} style={{ width: size, height: size }} />;
   }
   return (
     <span

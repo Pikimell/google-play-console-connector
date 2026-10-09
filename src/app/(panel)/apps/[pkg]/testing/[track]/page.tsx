@@ -54,25 +54,25 @@ export default function TrackTestersPage() {
   return (
     <>
       <PageHeader
-        title={<span className="flex items-center gap-2"><Users className="size-6 text-brand-600" />{trackInfo(track).label}</span>}
-        back={<Link href={`${base}/testing`} className="mb-2 inline-block text-sm text-gray-500 hover:text-gray-800">← Усі тестування</Link>}
+        title={<span className="flex items-center gap-2"><Users className="size-6 text-brand-600 dark:text-emerald-400" />{trackInfo(track).label}</span>}
+        back={<Link href={`${base}/testing`} className="mb-2 inline-block text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">← Усі тестування</Link>}
         actions={<LinkButton href={`${base}/release?track=${enc(track)}`} icon={<Rocket className="size-4" />}>Нова версія сюди</LinkButton>}
       />
 
       <div className="mb-6 grid gap-3 md:grid-cols-2">
         <Card className="p-4">
-          <div className="mb-1 text-sm font-medium text-gray-500">Поточна версія</div>
+          <div className="mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">Поточна версія</div>
           {release ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold">{release.name || `code ${release.versionCodes.join(", ")}`}</span>
               <Badge tone={STATUS_TONE[release.status]}>{STATUS_LABEL[release.status]}</Badge>
             </div>
           ) : (
-            <p className="text-sm text-gray-600">Ще немає. <Link className="font-medium text-brand-700 hover:underline" href={`${base}/release?track=${enc(track)}`}>Завантажити →</Link></p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Ще немає. <Link className="font-medium text-brand-700 dark:text-emerald-300 hover:underline" href={`${base}/release?track=${enc(track)}`}>Завантажити →</Link></p>
           )}
         </Card>
         <Card className="p-4">
-          <div className="mb-1 text-sm font-medium text-gray-500">Посилання для тестувальників</div>
+          <div className="mb-1 text-sm font-medium text-gray-500 dark:text-gray-400">Посилання для тестувальників</div>
           <div className="flex flex-wrap items-center gap-2">
             <code className="truncate text-sm">{optInLink(pkg)}</code>
             <CopyButton text={optInLink(pkg)} />
@@ -94,12 +94,12 @@ export default function TrackTestersPage() {
               {groups.map((g) => {
                 const on = !!g.googleGroup && assigned.includes(g.googleGroup);
                 return (
-                  <div key={g.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 p-3">
+                  <div key={g.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
                     <label className={`flex min-w-0 flex-1 items-center gap-3 ${g.googleGroup ? "cursor-pointer" : "opacity-70"}`}>
                       <input type="checkbox" disabled={!g.googleGroup} checked={on} onChange={() => g.googleGroup && toggle(g.googleGroup)} className="size-4 accent-brand-600" />
                       <span className="min-w-0">
-                        <span className="block font-medium">{g.name} <span className="font-normal text-gray-500">· {g.emails.length} email</span></span>
-                        <span className="block truncate font-mono text-xs text-gray-500">{g.googleGroup ?? "немає Google-групи — лише через CSV"}</span>
+                        <span className="block font-medium">{g.name} <span className="font-normal text-gray-500 dark:text-gray-400">· {g.emails.length} email</span></span>
+                        <span className="block truncate font-mono text-xs text-gray-500 dark:text-gray-400">{g.googleGroup ?? "немає Google-групи — лише через CSV"}</span>
                       </span>
                     </label>
                     <CsvButton name={g.name} emails={g.emails} label="CSV" />
@@ -107,14 +107,14 @@ export default function TrackTestersPage() {
                 );
               })}
               {assigned.filter((gg) => !byGG.has(gg)).map((gg) => (
-                <div key={gg} className="flex items-center gap-3 rounded-lg border border-gray-200 p-3">
+                <div key={gg} className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
                   <input type="checkbox" checked readOnly className="size-4 accent-brand-600" />
                   <span className="flex-1 font-mono text-sm">{gg}</span>
                   <Badge>не з панелі</Badge>
                   <Button size="sm" variant="ghost" icon={<Trash2 className="size-3.5" />} onClick={() => toggle(gg)} aria-label="Прибрати" />
                 </div>
               ))}
-              {!groups.length && !assigned.length && <p className="text-sm text-gray-500">Груп ще немає — створи першу.</p>}
+              {!groups.length && !assigned.length && <p className="text-sm text-gray-500 dark:text-gray-400">Груп ще немає — створи першу.</p>}
             </div>
 
             <form
@@ -131,8 +131,8 @@ export default function TrackTestersPage() {
             </form>
 
             <ErrorBox error={error} className="mt-4" />
-            <div className="mt-5 flex items-center justify-end gap-2 border-t border-gray-100 pt-4">
-              {dirty && <span className="mr-auto text-sm text-amber-700">Є незбережені зміни</span>}
+            <div className="mt-5 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
+              {dirty && <span className="mr-auto text-sm text-amber-700 dark:text-amber-300">Є незбережені зміни</span>}
               {dirty && <Button variant="ghost" onClick={() => setDraft(null)}>Скасувати</Button>}
               <Button disabled={!dirty} loading={busy} onClick={save}>Зберегти в Google Play</Button>
             </div>

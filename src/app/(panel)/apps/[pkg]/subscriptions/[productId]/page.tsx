@@ -58,7 +58,7 @@ function ListingsEditor({ sub, url, defaultLanguage, onSaved }: { sub: Subscript
             <button
               key={l}
               onClick={() => setLang(l)}
-              className={cn("flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm", l === current ? "bg-brand-50 font-semibold text-brand-700" : "hover:bg-gray-100")}
+              className={cn("flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm", l === current ? "bg-brand-50 dark:bg-brand-500/15 font-semibold text-brand-700 dark:text-emerald-300" : "hover:bg-gray-100 dark:hover:bg-gray-800")}
             >
               <span className="truncate">{languageName(l)}</span>
               {dirtyLangs.includes(l) && <span className="size-2 rounded-full bg-amber-500" />}
@@ -88,7 +88,7 @@ function ListingsEditor({ sub, url, defaultLanguage, onSaved }: { sub: Subscript
             </div>
             <ListingFields value={form} onChange={(v) => setEdits({ ...edits, [current]: v })} />
             <ErrorBox error={error} />
-            <div className="flex justify-end gap-2 border-t border-gray-100 pt-4">
+            <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
               {dirtyLangs.length > 0 && <Button variant="ghost" onClick={() => setEdits({})}>Скасувати зміни</Button>}
               <Button disabled={!dirtyLangs.length} loading={busy} onClick={() => save(merged(), "Опис підписки збережено")}>
                 Зберегти{dirtyLangs.length > 1 ? ` (${dirtyLangs.length} мови)` : ""}
@@ -246,7 +246,7 @@ function AddBasePlanModal({ url, onClose, onAdded }: { url: string; onClose: () 
       }
     >
       <BasePlanFields pkg={pkg} value={plan} onChange={setPlan} />
-      <p className="mt-4 text-xs text-gray-500">План з&apos;явиться як чернетка — активуй його, коли будеш готовий продавати.</p>
+      <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">План з&apos;явиться як чернетка — активуй його, коли будеш готовий продавати.</p>
       <ErrorBox error={error} className="mt-3" />
     </Modal>
   );
@@ -285,7 +285,7 @@ export default function SubscriptionPage() {
       <PageHeader
         title={title ?? productId}
         description={<span className="font-mono">{productId}</span>}
-        back={<Link href={list} className="mb-2 inline-block text-sm text-gray-500 hover:text-gray-800">← Усі підписки</Link>}
+        back={<Link href={list} className="mb-2 inline-block text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">← Усі підписки</Link>}
         actions={data && <Button variant="danger" loading={deleting} icon={<Trash2 className="size-4" />} onClick={remove}>Видалити</Button>}
       />
       <ErrorBox error={error} onRetry={reload} className="mb-4" />

@@ -128,8 +128,8 @@ export default function LocalizePage() {
                 ))}
               </Select>
               <div className="min-w-0 flex-1 text-sm">
-                <div className="truncate font-semibold">{source.title || <span className="text-amber-700">без назви</span>}</div>
-                <div className="truncate text-gray-600">{source.shortDescription}</div>
+                <div className="truncate font-semibold">{source.title || <span className="text-amber-700 dark:text-amber-300">без назви</span>}</div>
+                <div className="truncate text-gray-600 dark:text-gray-400">{source.shortDescription}</div>
                 <div className="text-xs text-gray-400">Повний опис: {source.fullDescription?.length ?? 0} символів</div>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function LocalizePage() {
 
           {/* 2. Мови перекладу */}
           <Card className="p-5">
-            <SectionTitle aside={<span className="text-sm text-gray-500">Обрано: <b className="text-gray-900">{targets.length}</b></span>}>2. На які мови перекласти</SectionTitle>
+            <SectionTitle aside={<span className="text-sm text-gray-500 dark:text-gray-400">Обрано: <b className="text-gray-900 dark:text-gray-100">{targets.length}</b></span>}>2. На які мови перекласти</SectionTitle>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <div className="relative w-full sm:w-64">
                 <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
@@ -149,11 +149,11 @@ export default function LocalizePage() {
               </Button>
               {targets.length > 0 && <Button size="sm" variant="ghost" onClick={() => setTargets([])}>Очистити</Button>}
             </div>
-            <div className="grid max-h-80 gap-1 overflow-y-auto rounded-lg border border-gray-100 p-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid max-h-80 gap-1 overflow-y-auto rounded-lg border border-gray-100 dark:border-gray-800 p-1 sm:grid-cols-2 lg:grid-cols-3">
               {visibleLangs.map((l) => {
                 const on = targets.includes(l.code);
                 return (
-                  <label key={l.code} className={cn("flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm", on ? "bg-brand-50" : "hover:bg-gray-50")}>
+                  <label key={l.code} className={cn("flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm", on ? "bg-brand-50 dark:bg-brand-500/15" : "hover:bg-gray-50 dark:hover:bg-gray-950")}>
                     <input type="checkbox" checked={on} onChange={() => toggleTarget(l.code)} className="size-4 accent-brand-600" />
                     <span className="min-w-0 flex-1 truncate">{l.name}</span>
                     {existing.has(l.code) && <Badge tone="green" className="shrink-0">є</Badge>}
@@ -163,7 +163,7 @@ export default function LocalizePage() {
               })}
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span className="text-sm font-medium text-gray-700">Що перекладати:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Що перекладати:</span>
               {(Object.keys(FIELD_LABELS) as Field[]).map((f) => (
                 <label key={f} className="flex items-center gap-1.5 text-sm">
                   <input type="checkbox" checked={fields.includes(f)} onChange={() => setFields(fields.includes(f) ? fields.filter((x) => x !== f) : [...fields, f])} className="size-4 accent-brand-600" />
@@ -171,7 +171,7 @@ export default function LocalizePage() {
                 </label>
               ))}
             </div>
-            <div className="mt-5 flex justify-end border-t border-gray-100 pt-4">
+            <div className="mt-5 flex justify-end border-t border-gray-100 dark:border-gray-800 pt-4">
               <Button size="lg" icon={<Languages className="size-4" />} loading={running} disabled={!openaiReady || !targets.length || !fields.length} onClick={() => run(targets)}>
                 Перекласти й зберегти{targets.length ? ` (${targets.length})` : ""}
               </Button>
@@ -182,18 +182,18 @@ export default function LocalizePage() {
           {jobList.length > 0 && (
             <Card className="p-5">
               <SectionTitle aside={!running && <Button size="sm" variant="ghost" onClick={() => setJobs({})}>Очистити</Button>}>Хід перекладу</SectionTitle>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
                 {jobList.map(([lang, j]) => (
                   <div key={lang} className="flex flex-wrap items-start gap-3 py-2 text-sm">
                     <JobIcon state={j.state} />
                     <span className="w-48 shrink-0 font-medium">{languageName(lang)}</span>
-                    <span className="min-w-0 flex-1 text-gray-600">
+                    <span className="min-w-0 flex-1 text-gray-600 dark:text-gray-400">
                       {j.state === "error" ? (
-                        <span className="text-red-700">{j.error?.message}{j.error?.hint && <span className="block text-xs text-red-600">{j.error.hint}</span>}</span>
+                        <span className="text-red-700 dark:text-red-300">{j.error?.message}{j.error?.hint && <span className="block text-xs text-red-600 dark:text-red-400">{j.error.hint}</span>}</span>
                       ) : (
                         JOB_TEXT[j.state]
                       )}
-                      {j.warnings?.map((w) => <span key={w} className="block text-xs text-amber-700"><AlertTriangle className="mr-1 inline size-3" />{w}</span>)}
+                      {j.warnings?.map((w) => <span key={w} className="block text-xs text-amber-700 dark:text-amber-300"><AlertTriangle className="mr-1 inline size-3" />{w}</span>)}
                     </span>
                     {j.state === "error" && !running && <Button size="sm" variant="secondary" icon={<RotateCw className="size-3.5" />} onClick={() => run([lang])}>Ще раз</Button>}
                   </div>
@@ -205,7 +205,7 @@ export default function LocalizePage() {
           {/* 3. Наявні локалізації */}
           <Card className="p-5">
             <SectionTitle>Наявні локалізації ({listings.length})</SectionTitle>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 dark:divide-gray-800">
               {listings.map((l) => {
                 const isSource = l.language === source.language;
                 const j = jobs[l.language];
@@ -218,7 +218,7 @@ export default function LocalizePage() {
                     </div>
                     <div className="min-w-0 flex-1 text-sm">
                       <div className="truncate">{l.title || <span className="text-gray-400">—</span>}</div>
-                      <div className="truncate text-xs text-gray-500">{l.shortDescription}</div>
+                      <div className="truncate text-xs text-gray-500 dark:text-gray-400">{l.shortDescription}</div>
                     </div>
                     {isSource ? (
                       <Badge tone="violet">оригінал</Badge>
@@ -249,9 +249,9 @@ const JOB_TEXT: Record<JobState, string> = {
 };
 
 function JobIcon({ state }: { state: JobState }) {
-  if (state === "saved") return <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" />;
-  if (state === "error") return <XCircle className="mt-0.5 size-4 shrink-0 text-red-600" />;
-  if (state === "waiting") return <Circle className="mt-0.5 size-4 shrink-0 text-gray-300" />;
+  if (state === "saved") return <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />;
+  if (state === "error") return <XCircle className="mt-0.5 size-4 shrink-0 text-red-600 dark:text-red-400" />;
+  if (state === "waiting") return <Circle className="mt-0.5 size-4 shrink-0 text-gray-300 dark:text-gray-600" />;
   if (state === "translated") return <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-gray-400" />;
-  return <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-brand-600" />;
+  return <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-brand-600 dark:text-emerald-400" />;
 }

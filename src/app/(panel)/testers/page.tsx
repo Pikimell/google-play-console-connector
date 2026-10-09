@@ -48,7 +48,7 @@ export default function TestersPage() {
                       <Badge tone="gray">{g.emails.length} email</Badge>
                       {g.googleGroup ? <Badge tone="green">Google-група</Badge> : <Badge tone="amber">без Google-групи</Badge>}
                     </div>
-                    {g.googleGroup && <div className="mt-0.5 font-mono text-xs text-gray-500">{g.googleGroup}</div>}
+                    {g.googleGroup && <div className="mt-0.5 font-mono text-xs text-gray-500 dark:text-gray-400">{g.googleGroup}</div>}
                     <div className="mt-0.5 text-xs text-gray-400">Оновлено {formatDate(g.updatedAt)}</div>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -62,10 +62,10 @@ export default function TestersPage() {
                   <div className="mt-3">
                     <div className="flex flex-wrap gap-1.5">
                       {(expanded === g.id ? g.emails : g.emails.slice(0, 8)).map((e) => (
-                        <span key={e} className="rounded-md bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-700">{e}</span>
+                        <span key={e} className="rounded-md bg-gray-100 dark:bg-gray-800 px-2 py-0.5 font-mono text-xs text-gray-700 dark:text-gray-300">{e}</span>
                       ))}
                       {g.emails.length > 8 && (
-                        <button className="text-xs font-medium text-brand-700 hover:underline" onClick={() => setExpanded(expanded === g.id ? null : g.id)}>
+                        <button className="text-xs font-medium text-brand-700 dark:text-emerald-300 hover:underline" onClick={() => setExpanded(expanded === g.id ? null : g.id)}>
                           {expanded === g.id ? "згорнути" : `+ ще ${g.emails.length - 8}`}
                         </button>
                       )}

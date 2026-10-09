@@ -96,13 +96,13 @@ export default function NewClosedTestingPage() {
   if (result) {
     return (
       <Card className="max-w-3xl p-8">
-        <CheckCircle2 className="mb-3 size-12 text-emerald-600" />
+        <CheckCircle2 className="mb-3 size-12 text-emerald-600 dark:text-emerald-400" />
         <h2 className="text-xl font-semibold">Закрите тестування «{result.track}» створено</h2>
-        <ol className="mt-5 space-y-4 text-sm text-gray-700">
+        <ol className="mt-5 space-y-4 text-sm text-gray-700 dark:text-gray-300">
           {withoutGG.length > 0 && (
-            <li className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <div className="mb-2 font-semibold text-amber-900">Додай email-список у Play Console (Google не дає зробити це через API)</div>
-              <p className="mb-3 text-amber-900">
+            <li className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4">
+              <div className="mb-2 font-semibold text-amber-900 dark:text-amber-200">Додай email-список у Play Console (Google не дає зробити це через API)</div>
+              <p className="mb-3 text-amber-900 dark:text-amber-200">
                 Play Console → Тестування → Закрите тестування → «{result.track}» → вкладка «Тестувальники» → «Створити список email-адрес» → «Завантажити CSV».
               </p>
               <div className="flex flex-wrap gap-2">
@@ -111,7 +111,7 @@ export default function NewClosedTestingPage() {
             </li>
           )}
           {!versionCode && (
-            <li className="rounded-xl border border-gray-200 p-4">
+            <li className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
               <div className="mb-2 font-semibold">Завантаж збірку для тестувальників</div>
               <LinkButton size="sm" href={`/apps/${enc(pkg)}/release?track=${enc(result.track)}`}>Нова версія в цей трек</LinkButton>
             </li>
@@ -119,13 +119,13 @@ export default function NewClosedTestingPage() {
           {!result.sentForReview && (
             <Alert tone="warning">Відправ зміни на перевірку вручну: Play Console → «Огляд публікації» → «Надіслати зміни на перевірку».</Alert>
           )}
-          <li className="rounded-xl border border-gray-200 p-4">
+          <li className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
             <div className="mb-2 font-semibold">Надішли тестувальникам посилання</div>
             <div className="flex flex-wrap items-center gap-2">
-              <code className="rounded bg-gray-100 px-2 py-1 break-all">{optInLink(pkg)}</code>
+              <code className="rounded bg-gray-100 dark:bg-gray-800 px-2 py-1 break-all">{optInLink(pkg)}</code>
               <CopyButton text={optInLink(pkg)} />
             </div>
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
               Посилання запрацює, коли реліз пройде перевірку Google (для закритого тестування зазвичай від кількох годин). Тестувальник відкриває його під своїм Google-акаунтом → «Стати тестувальником» → встановлює з Google Play.
             </p>
           </li>
@@ -157,10 +157,10 @@ export default function NewClosedTestingPage() {
                   </Field>
                   <div className="flex flex-wrap gap-1.5">
                     {SUGGESTIONS.filter((s) => !existingTracks.has(s)).map((s) => (
-                      <button key={s} type="button" onClick={() => setName(s)} className="rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-xs hover:border-brand-500">{s}</button>
+                      <button key={s} type="button" onClick={() => setName(s)} className="rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2.5 py-0.5 text-xs hover:border-brand-500">{s}</button>
                     ))}
                   </div>
-                  {nameError && <p className="text-sm text-red-600">{nameError}</p>}
+                  {nameError && <p className="text-sm text-red-600 dark:text-red-400">{nameError}</p>}
                 </div>
               )}
               <ChoiceCard
@@ -180,7 +180,7 @@ export default function NewClosedTestingPage() {
         {step === 1 && (
           <>
             <h2 className="mb-1 text-lg font-semibold">Хто тестує?</h2>
-            <p className="mb-4 text-sm text-gray-600">Обери одну чи кілька груп. Групи зберігаються в панелі — їх можна використовувати і в інших застосунках.</p>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">Обери одну чи кілька груп. Групи зберігаються в панелі — їх можна використовувати і в інших застосунках.</p>
             {groupsApi.loading && !groupsApi.data ? (
               <Spinner />
             ) : (
@@ -192,12 +192,12 @@ export default function NewClosedTestingPage() {
                       key={g.id}
                       type="button"
                       onClick={() => setSelected(on ? selected.filter((x) => x !== g.id) : [...selected, g.id])}
-                      className={cn("flex w-full items-center gap-3 rounded-xl border p-3 text-left transition", on ? "border-brand-600 bg-brand-50 ring-1 ring-brand-600" : "border-gray-200 hover:bg-gray-50")}
+                      className={cn("flex w-full items-center gap-3 rounded-xl border p-3 text-left transition", on ? "border-brand-600 bg-brand-50 dark:bg-brand-500/15 ring-1 ring-brand-600" : "border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-950")}
                     >
                       <input type="checkbox" readOnly checked={on} className="size-4 accent-brand-600" />
                       <span className="min-w-0 flex-1">
                         <span className="block font-medium">{g.name}</span>
-                        <span className="block truncate text-xs text-gray-500">{g.googleGroup ?? "без Google-групи — тестувальників треба буде додати CSV-файлом у Play Console"}</span>
+                        <span className="block truncate text-xs text-gray-500 dark:text-gray-400">{g.googleGroup ?? "без Google-групи — тестувальників треба буде додати CSV-файлом у Play Console"}</span>
                       </span>
                       <Badge>{g.emails.length} email</Badge>
                     </button>
@@ -247,18 +247,18 @@ export default function NewClosedTestingPage() {
         {step === 3 && (
           <>
             <h2 className="mb-4 text-lg font-semibold">Усе правильно?</h2>
-            <dl className="divide-y divide-gray-100 rounded-xl border border-gray-200 text-sm">
-              <div className="flex gap-4 px-4 py-2.5"><dt className="w-36 shrink-0 text-gray-500">Трек</dt><dd className="font-medium">{trackLabel}</dd></div>
+            <dl className="divide-y divide-gray-100 dark:divide-gray-800 rounded-xl border border-gray-200 dark:border-gray-800 text-sm">
+              <div className="flex gap-4 px-4 py-2.5"><dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">Трек</dt><dd className="font-medium">{trackLabel}</dd></div>
               <div className="flex gap-4 px-4 py-2.5">
-                <dt className="w-36 shrink-0 text-gray-500">Тестувальники</dt>
+                <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">Тестувальники</dt>
                 <dd className="space-y-1">
-                  {chosen.length === 0 ? <span className="text-amber-700">не обрано — можна додати пізніше</span> : chosen.map((g) => (
-                    <div key={g.id}>{g.name} <span className="text-gray-500">· {g.emails.length} email{g.googleGroup ? ` · ${g.googleGroup}` : " · через CSV"}</span></div>
+                  {chosen.length === 0 ? <span className="text-amber-700 dark:text-amber-300">не обрано — можна додати пізніше</span> : chosen.map((g) => (
+                    <div key={g.id}>{g.name} <span className="text-gray-500 dark:text-gray-400">· {g.emails.length} email{g.googleGroup ? ` · ${g.googleGroup}` : " · через CSV"}</span></div>
                   ))}
                 </dd>
               </div>
               <div className="flex gap-4 px-4 py-2.5">
-                <dt className="w-36 shrink-0 text-gray-500">Збірка</dt>
+                <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">Збірка</dt>
                 <dd className="font-medium">{versionCode ? `versionCode ${versionCode}${asDraft ? " · чернетка" : ""}` : "буде додано пізніше"}</dd>
               </div>
             </dl>

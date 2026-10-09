@@ -108,7 +108,7 @@ function ListingEditor() {
               <button
                 key={l}
                 onClick={() => setLang(l)}
-                className={cn("flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm", l === current ? "bg-brand-50 font-semibold text-brand-700" : "hover:bg-gray-100")}
+                className={cn("flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm", l === current ? "bg-brand-50 dark:bg-brand-500/15 font-semibold text-brand-700 dark:text-emerald-300" : "hover:bg-gray-100 dark:hover:bg-gray-800")}
               >
                 <span className="truncate">{languageName(l)}</span>
                 {l === data.defaultLanguage ? <Badge tone="green">основна</Badge> : edits[l] ? <span className="size-2 rounded-full bg-amber-500" /> : null}
@@ -152,7 +152,7 @@ function ListingEditor() {
                 <Input value={form.video} onChange={(e) => set({ video: e.target.value })} placeholder="https://www.youtube.com/watch?v=…" />
               </Field>
               <ErrorBox error={saveError} />
-              <div className="flex justify-end gap-2 border-t border-gray-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
                 {dirty && <Button variant="ghost" onClick={() => { const { [current]: _, ...rest } = edits; void _; setEdits(rest); }}>Скасувати зміни</Button>}
                 <Button disabled={!dirty} loading={busy} onClick={save}>Зберегти в Google Play</Button>
               </div>
@@ -171,7 +171,7 @@ function ListingEditor() {
           <option value="">Обери мову…</option>
           {LANGUAGES.filter((l) => !languages.includes(l.code)).map((l) => <option key={l.code} value={l.code}>{l.name} ({l.code})</option>)}
         </Select>
-        <p className="mt-2 text-xs text-gray-500">Переклад з&apos;явиться в Google Play після збереження.</p>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Переклад з&apos;явиться в Google Play після збереження.</p>
       </Modal>
     </>
   );

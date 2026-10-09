@@ -58,12 +58,12 @@ function NewSubscriptionModal({ open, onClose, onCreated }: { open: boolean; onC
           <Input value={productId} onChange={(e) => setProductId(e.target.value.toLowerCase())} placeholder="premium" />
         </Field>
         <div>
-          <div className="mb-3 text-sm font-semibold text-gray-900">Опис · {languageName(lang)}</div>
+          <div className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Опис · {languageName(lang)}</div>
           <ListingFields value={listing} onChange={setListing} />
-          <p className="mt-2 text-xs text-gray-500">Інші мови можна додати після створення.</p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Інші мови можна додати після створення.</p>
         </div>
         <div>
-          <div className="mb-3 text-sm font-semibold text-gray-900">Базовий план</div>
+          <div className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Базовий план</div>
           <BasePlanFields pkg={pkg} value={plan} onChange={setPlan} />
         </div>
         <Checkbox checked={activate} onChange={setActivate} label="Одразу активувати план" description="Інакше план лишиться чернеткою, і купити його не вийде, доки не активуєш." />
@@ -107,12 +107,12 @@ export default function SubscriptionsPage() {
             <Link key={s.productId} href={`${base}/${enc(s.productId)}`} className="block">
               <Card className="p-5 transition hover:border-brand-300 hover:shadow">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-gray-900">{subscriptionTitle(s, lang)}</span>
-                  <span className="font-mono text-xs text-gray-500">{s.productId}</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{subscriptionTitle(s, lang)}</span>
+                  <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{s.productId}</span>
                   {s.archived && <Badge>в архіві</Badge>}
                 </div>
                 {s.basePlans.length ? (
-                  <div className="space-y-2 border-t border-gray-100 pt-3">
+                  <div className="space-y-2 border-t border-gray-100 dark:border-gray-800 pt-3">
                     {s.basePlans.map((p) => <BasePlanSummary key={p.basePlanId} plan={p} />)}
                   </div>
                 ) : (

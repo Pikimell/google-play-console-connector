@@ -10,7 +10,7 @@ import type { Review } from "@/lib/types";
 function Stars({ n = 0 }: { n?: number }) {
   return (
     <span className="inline-flex">
-      {[1, 2, 3, 4, 5].map((i) => <Star key={i} className={cn("size-4", i <= n ? "fill-amber-400 text-amber-400" : "text-gray-300")} />)}
+      {[1, 2, 3, 4, 5].map((i) => <Star key={i} className={cn("size-4", i <= n ? "fill-amber-400 text-amber-400" : "text-gray-300 dark:text-gray-600")} />)}
     </span>
   );
 }
@@ -44,18 +44,18 @@ function ReviewCard({ pkg, r, onReplied }: { pkg: string; r: Review; onReplied: 
         {r.appVersionName && <Badge>v{r.appVersionName}</Badge>}
         {r.device && <Badge>{r.device}</Badge>}
       </div>
-      {r.text && <p className="mt-2 text-sm whitespace-pre-line text-gray-800">{r.text}</p>}
+      {r.text && <p className="mt-2 text-sm whitespace-pre-line text-gray-800 dark:text-gray-200">{r.text}</p>}
       {r.reply && !open && (
-        <div className="mt-3 rounded-lg bg-gray-50 p-3 text-sm">
-          <div className="mb-1 text-xs font-medium text-gray-500">Твоя відповідь · {formatDate(r.reply.lastModified)}</div>
-          <p className="whitespace-pre-line text-gray-700">{r.reply.text}</p>
+        <div className="mt-3 rounded-lg bg-gray-50 dark:bg-gray-950 p-3 text-sm">
+          <div className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">Твоя відповідь · {formatDate(r.reply.lastModified)}</div>
+          <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">{r.reply.text}</p>
         </div>
       )}
       {open ? (
         <div className="mt-3 space-y-2">
           <Textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Дякуємо за відгук!…" />
           <div className="flex items-center justify-between">
-            <span className={cn("text-xs", text.length > 350 ? "text-red-600" : "text-gray-400")}>{text.length}/350</span>
+            <span className={cn("text-xs", text.length > 350 ? "text-red-600 dark:text-red-400" : "text-gray-400")}>{text.length}/350</span>
             <div className="flex gap-2">
               <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Скасувати</Button>
               <Button size="sm" loading={busy} disabled={!text.trim() || text.length > 350} onClick={send}>Опублікувати відповідь</Button>
@@ -83,7 +83,7 @@ export default function ReviewsPage() {
       <PageHeader title="Відгуки" description="Google API віддає лише відгуки з текстом за останні 7 днів. Старіші — у Play Console." />
       <div className="mb-4 flex gap-2">
         {([["all", `Усі (${all.length})`], ["unanswered", `Без відповіді (${all.filter((r) => !r.reply).length})`], ["low", "1–3 зірки"]] as const).map(([k, label]) => (
-          <button key={k} onClick={() => setFilter(k)} className={cn("rounded-full border px-3 py-1 text-sm", filter === k ? "border-brand-600 bg-brand-50 font-medium text-brand-700" : "border-gray-300 bg-white hover:bg-gray-50")}>{label}</button>
+          <button key={k} onClick={() => setFilter(k)} className={cn("rounded-full border px-3 py-1 text-sm", filter === k ? "border-brand-600 bg-brand-50 dark:bg-brand-500/15 font-medium text-brand-700 dark:text-emerald-300" : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-950")}>{label}</button>
         ))}
       </div>
       <ErrorBox error={error} onRetry={reload} className="mb-4" />

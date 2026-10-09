@@ -46,11 +46,11 @@ export function BuildUploader({ pkg, value, onUploaded, onReset }: { pkg: string
 
   if (value) {
     return (
-      <div className="flex items-center gap-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-        <CheckCircle2 className="size-8 shrink-0 text-emerald-600" />
+      <div className="flex items-center gap-4 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 p-4">
+        <CheckCircle2 className="size-8 shrink-0 text-emerald-600 dark:text-emerald-400" />
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-emerald-900">Файл завантажено в Google Play</div>
-          <div className="truncate text-sm text-emerald-800">
+          <div className="font-semibold text-emerald-900 dark:text-emerald-200">Файл завантажено в Google Play</div>
+          <div className="truncate text-sm text-emerald-800 dark:text-emerald-300">
             {value.fileName} · {formatBytes(value.size)} · <b>versionCode {value.versionCode}</b>
           </div>
         </div>
@@ -61,12 +61,12 @@ export function BuildUploader({ pkg, value, onUploaded, onReset }: { pkg: string
 
   if (phase !== "idle") {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
         <div className="mb-3 flex items-center gap-3">
-          <FileArchive className="size-6 text-brand-600" />
+          <FileArchive className="size-6 text-brand-600 dark:text-emerald-400" />
           <div className="min-w-0 flex-1">
             <div className="truncate font-medium">{file?.name}</div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {phase === "uploading"
                 ? `Відправка на сервер панелі… ${Math.round(progress * 100)}% з ${formatBytes(file?.size ?? 0)}`
                 : "Google Play перевіряє та обробляє файл. Для великих збірок це може тривати кілька хвилин — не закривай сторінку."}
@@ -96,12 +96,12 @@ export function BuildUploader({ pkg, value, onUploaded, onReset }: { pkg: string
         }}
         className={cn(
           "flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition",
-          drag ? "border-brand-500 bg-brand-50" : "border-gray-300 bg-white hover:border-brand-500 hover:bg-gray-50",
+          drag ? "border-brand-500 bg-brand-50 dark:bg-brand-500/15" : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-brand-500 hover:bg-gray-50 dark:hover:bg-gray-950",
         )}
       >
-        <UploadCloud className={cn("mb-3 size-10", drag ? "text-brand-600" : "text-gray-400")} />
-        <div className="font-semibold text-gray-900">Перетягни сюди файл .aab або .apk</div>
-        <div className="mt-1 text-sm text-gray-500">або натисни, щоб вибрати на комп&apos;ютері</div>
+        <UploadCloud className={cn("mb-3 size-10", drag ? "text-brand-600 dark:text-emerald-400" : "text-gray-400")} />
+        <div className="font-semibold text-gray-900 dark:text-gray-100">Перетягни сюди файл .aab або .apk</div>
+        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">або натисни, щоб вибрати на комп&apos;ютері</div>
         <div className="mt-3 text-xs text-gray-400">Збірка має бути release-версією, підписаною upload-ключем, з новим versionCode</div>
       </button>
       <input
@@ -126,7 +126,7 @@ export function ExistingBuildPicker({ pkg, value, onChange }: { pkg: string; val
   if (loading) return <Spinner label="Отримую список завантажених збірок…" />;
   if (error) return <ErrorBox error={error} onRetry={reload} />;
   const list = data?.bundles ?? [];
-  if (!list.length) return <p className="text-sm text-gray-500">У Google Play ще немає жодної завантаженої збірки.</p>;
+  if (!list.length) return <p className="text-sm text-gray-500 dark:text-gray-400">У Google Play ще немає жодної завантаженої збірки.</p>;
   return (
     <div className="grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2">
       {list.map((b) => (
@@ -136,10 +136,10 @@ export function ExistingBuildPicker({ pkg, value, onChange }: { pkg: string; val
           onClick={() => onChange(b.versionCode)}
           className={cn(
             "flex items-center gap-3 rounded-lg border px-3 py-2 text-left text-sm transition",
-            value === b.versionCode ? "border-brand-600 bg-brand-50 ring-1 ring-brand-600" : "border-gray-200 bg-white hover:bg-gray-50",
+            value === b.versionCode ? "border-brand-600 bg-brand-50 dark:bg-brand-500/15 ring-1 ring-brand-600" : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-950",
           )}
         >
-          <Package className="size-4 text-gray-500" />
+          <Package className="size-4 text-gray-500 dark:text-gray-400" />
           <span className="flex-1 font-medium">versionCode {b.versionCode}</span>
           <Badge>{b.kind.toUpperCase()}</Badge>
         </button>
@@ -161,7 +161,7 @@ export function ReleaseNotesEditor({ value, onChange }: { value: ReleaseNote[]; 
             <span className="flex items-center gap-2">
               Що нового · {languageName(n.language)} <span className="font-mono text-xs text-gray-400">{n.language}</span>
               {value.length > 1 && (
-                <button type="button" className="text-gray-400 hover:text-red-600" title="Прибрати мову" onClick={() => onChange(value.filter((_, j) => j !== i))}>
+                <button type="button" className="text-gray-400 hover:text-red-600 dark:hover:text-red-400" title="Прибрати мову" onClick={() => onChange(value.filter((_, j) => j !== i))}>
                   <Trash2 className="size-3.5" />
                 </button>
               )}

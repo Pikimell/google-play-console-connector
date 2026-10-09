@@ -31,7 +31,7 @@ export default function LoginPage() {
             <Lock className="size-5" />
           </span>
           <h1 className="text-xl font-semibold">Play Publisher</h1>
-          <p className="mt-1 text-sm text-gray-500">Введи пароль панелі (ADMIN_PASSWORD)</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Введи пароль панелі (ADMIN_PASSWORD)</p>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <Input type="password" autoFocus placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} />
