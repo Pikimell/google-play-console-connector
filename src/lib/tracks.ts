@@ -137,7 +137,6 @@ export const LANGUAGES: { code: string; name: string; en: string }[] = [
   { code: "az-AZ", name: "Azərbaycan", en: "Azerbaijani" },
   { code: "kk", name: "Қазақ", en: "Kazakh" },
   { code: "ky-KG", name: "Кыргызча", en: "Kyrgyz" },
-  { code: "uz", name: "Oʻzbek", en: "Uzbek" },
   { code: "mn-MN", name: "Монгол", en: "Mongolian" },
   { code: "be", name: "Беларуская", en: "Belarusian" },
   { code: "ru-RU", name: "Русский", en: "Russian" },

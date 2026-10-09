@@ -15,6 +15,14 @@ export const PUT = route<P>(async (req, { pkg }) => {
   await saveListings(pkg, listings);
 });
 
+/** Масова локалізація: пропустити непідтримувані мови й зберегти решту. */
+export const PATCH = route<P>(async (req, { pkg }) => {
+  const listings = await jsonBody<Listing[]>(req);
+  if (!Array.isArray(listings) || !listings.length) throw new ApiError(400, "Немає що зберігати.");
+  const { result } = await saveListings(pkg, listings, true);
+  return result;
+});
+
 export const DELETE = route<P>(async (req, { pkg }) => {
   const language = new URL(req.url).searchParams.get("language");
   if (!language) throw new ApiError(400, "Не вказано мову.");

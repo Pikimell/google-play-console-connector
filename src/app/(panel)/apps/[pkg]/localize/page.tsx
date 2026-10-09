@@ -39,13 +39,16 @@ export default function LocalizePage() {
     listings.find((l) => l.language === listingsApi.data?.defaultLanguage) ??
     listings[0];
   const openaiReady = status.data?.openai.configured;
+  const missingLangs = LANGUAGES.filter((l) => l.code !== source?.language && !existing.has(l.code));
+  const selectedTargets = targets.filter((c) => c !== source?.language);
   const visibleLangs = LANGUAGES.filter((l) => l.code !== source?.language && (!query || `${l.name} ${l.en} ${l.code}`.toLowerCase().includes(query.toLowerCase())));
   const toggleTarget = (c: string) => setTargets((t) => (t.includes(c) ? t.filter((x) => x !== c) : [...t, c]));
   const setJob = (lang: string, j: Job) => setJobs((all) => ({ ...all, [lang]: j }));
 
   /** Перекласти мови (по 3 паралельно), потім зберегти всі вдалі переклади одним комітом у Google Play. */
   async function run(langs: string[]) {
-    if (!source || !langs.length) return;
+    langs = [...new Set(langs)].filter((lang) => lang !== source?.language);
+    if (running || !source || !langs.length) return;
     const overwrite = langs.filter((l) => existing.has(l));
     if (overwrite.length > 1 && !confirm(`${overwrite.length} мов вже мають опис (${overwrite.map(languageName).join(", ")}). Перезаписати їх перекладом?`)) return;
     setRunning(true);
@@ -80,14 +83,18 @@ export default function LocalizePage() {
     if (done.length) {
       setJobs((all) => ({ ...all, ...Object.fromEntries(done.map((l) => [l.language, { ...all[l.language], state: "saving" as JobState }])) }));
       try {
-        await api(url, { method: "PUT", json: done });
-        setJobs((all) => ({ ...all, ...Object.fromEntries(done.map((l) => [l.language, { ...all[l.language], state: "saved" as JobState }])) }));
-        toast("success", `Збережено в Google Play: ${done.length} ${done.length === 1 ? "мова" : "мов(и)"}`);
-        setTargets((t) => t.filter((x) => !done.some((d) => d.language === x)));
+        const result = await api<{ saved: string[]; failed: { language: string; error: ErrInfo }[] }>(url, { method: "PATCH", json: done });
+        setJobs((all) => ({
+          ...all,
+          ...Object.fromEntries(result.saved.map((lang) => [lang, { ...all[lang], state: "saved" as JobState }])),
+          ...Object.fromEntries(result.failed.map(({ language, error }) => [language, { ...all[language], state: "error" as JobState, error }])),
+        }));
+        toast("success", `Збережено в Google Play: ${result.saved.length} мов(и)`);
+        setTargets((t) => t.filter((x) => !result.saved.includes(x)));
         await listingsApi.reload();
       } catch (e) {
         const err = errorInfo(e);
-        setJobs((all) => ({ ...all, ...Object.fromEntries(done.map((l) => [l.language, { state: "error" as JobState, error: err }])) }));
+        setJobs((all) => ({ ...all, ...Object.fromEntries(done.map((l) => [l.language, { ...all[l.language], state: "error" as JobState, error: err }])) }));
       }
     }
     setRunning(false);
@@ -122,7 +129,7 @@ export default function LocalizePage() {
           <Card className="p-5">
             <SectionTitle aside={status.data?.openai.configured && <Badge tone="violet">модель {status.data.openai.model}</Badge>}>1. Мова оригіналу</SectionTitle>
             <div className="flex flex-wrap items-start gap-4">
-              <Select value={source.language} onChange={(e) => setSourceLang(e.target.value)} className="w-64">
+              <Select value={source.language} disabled={running} onChange={(e) => { setSourceLang(e.target.value); setTargets((t) => t.filter((c) => c !== e.target.value)); }} className="w-64">
                 {listings.map((l) => (
                   <option key={l.language} value={l.language}>{languageName(l.language)} ({l.language})</option>
                 ))}
@@ -137,24 +144,27 @@ export default function LocalizePage() {
 
           {/* 2. Мови перекладу */}
           <Card className="p-5">
-            <SectionTitle aside={<span className="text-sm text-gray-500 dark:text-gray-400">Обрано: <b className="text-gray-900 dark:text-gray-100">{targets.length}</b></span>}>2. На які мови перекласти</SectionTitle>
+            <SectionTitle aside={<span className="text-sm text-gray-500 dark:text-gray-400">Обрано: <b className="text-gray-900 dark:text-gray-100">{selectedTargets.length}</b></span>}>2. На які мови перекласти</SectionTitle>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <div className="relative w-full sm:w-64">
                 <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
                 <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Пошук мови…" className="pl-9" />
               </div>
-              <Button size="sm" variant="secondary" onClick={() => setTargets([...new Set([...targets, ...POPULAR.filter((c) => c !== source.language)])])}>+ Популярні</Button>
-              <Button size="sm" variant="secondary" disabled={listings.length < 2} onClick={() => setTargets(listings.map((l) => l.language).filter((c) => c !== source.language))}>
+              <Button size="sm" variant="secondary" disabled={running} onClick={() => setTargets([...new Set([...targets, ...POPULAR.filter((c) => c !== source.language)])])}>+ Популярні</Button>
+              <Button size="sm" variant="secondary" disabled={running || listings.length < 2} onClick={() => setTargets(listings.map((l) => l.language).filter((c) => c !== source.language))}>
                 Усі наявні ({Math.max(0, listings.length - 1)})
               </Button>
-              {targets.length > 0 && <Button size="sm" variant="ghost" onClick={() => setTargets([])}>Очистити</Button>}
+              <Button size="sm" variant="secondary" disabled={running || !missingLangs.length} onClick={() => setTargets(missingLangs.map((l) => l.code))}>
+                Усі без перекладу ({missingLangs.length})
+              </Button>
+              {selectedTargets.length > 0 && <Button size="sm" variant="ghost" disabled={running} onClick={() => setTargets([])}>Очистити</Button>}
             </div>
             <div className="grid max-h-80 gap-1 overflow-y-auto rounded-lg border border-gray-100 dark:border-gray-800 p-1 sm:grid-cols-2 lg:grid-cols-3">
               {visibleLangs.map((l) => {
                 const on = targets.includes(l.code);
                 return (
                   <label key={l.code} className={cn("flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm", on ? "bg-brand-50 dark:bg-brand-500/15" : "hover:bg-gray-50 dark:hover:bg-gray-950")}>
-                    <input type="checkbox" checked={on} onChange={() => toggleTarget(l.code)} className="size-4 accent-brand-600" />
+                    <input type="checkbox" disabled={running} checked={on} onChange={() => toggleTarget(l.code)} className="size-4 accent-brand-600" />
                     <span className="min-w-0 flex-1 truncate">{l.name}</span>
                     {existing.has(l.code) && <Badge tone="green" className="shrink-0">є</Badge>}
                     <span className="shrink-0 font-mono text-[11px] text-gray-400">{l.code}</span>
@@ -166,14 +176,14 @@ export default function LocalizePage() {
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Що перекладати:</span>
               {(Object.keys(FIELD_LABELS) as Field[]).map((f) => (
                 <label key={f} className="flex items-center gap-1.5 text-sm">
-                  <input type="checkbox" checked={fields.includes(f)} onChange={() => setFields(fields.includes(f) ? fields.filter((x) => x !== f) : [...fields, f])} className="size-4 accent-brand-600" />
+                  <input type="checkbox" disabled={running} checked={fields.includes(f)} onChange={() => setFields(fields.includes(f) ? fields.filter((x) => x !== f) : [...fields, f])} className="size-4 accent-brand-600" />
                   {FIELD_LABELS[f]}
                 </label>
               ))}
             </div>
             <div className="mt-5 flex justify-end border-t border-gray-100 dark:border-gray-800 pt-4">
-              <Button size="lg" icon={<Languages className="size-4" />} loading={running} disabled={!openaiReady || !targets.length || !fields.length} onClick={() => run(targets)}>
-                Перекласти й зберегти{targets.length ? ` (${targets.length})` : ""}
+              <Button size="lg" icon={<Languages className="size-4" />} loading={running} disabled={!openaiReady || !selectedTargets.length || !fields.length} onClick={() => run(selectedTargets)}>
+                Перекласти й зберегти{selectedTargets.length ? ` (${selectedTargets.length})` : ""}
               </Button>
             </div>
           </Card>

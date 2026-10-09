@@ -1,6 +1,6 @@
 import "server-only";
 import type { androidpublisher_v3 } from "googleapis";
-import { readInEdit, writeInEdit, getPublisher, commitEdit, withEditLock } from "./google";
+import { readInEdit, writeInEdit, getPublisher, commitEdit, withEditLock, googleMessage } from "./google";
 import type { AppDetails, AppOverview, Bundle, ImageType, Listing, Release, ReleaseNote, ReleaseStatus, StoreImage, Track } from "./types";
 import { ApiError } from "./errors";
 
@@ -226,23 +226,37 @@ function validateListing(l: Listing) {
 }
 
 /** Зберегти один або кілька описів (кілька мов) одним комітом. */
-export async function saveListings(pkg: string, listings: Listing[]) {
+export async function saveListings(pkg: string, listings: Listing[], skipUnsupported = false) {
   listings.forEach(validateListing);
   return writeInEdit(pkg, async (editId, api) => {
+    const saved: string[] = [];
+    const failed: { language: string; error: { message: string } }[] = [];
     for (const l of listings) {
-      await api.edits.listings.update({
-        packageName: pkg,
-        editId,
-        language: l.language,
-        requestBody: {
+      try {
+        await api.edits.listings.update({
+          packageName: pkg,
+          editId,
           language: l.language,
-          title: l.title,
-          shortDescription: l.shortDescription,
-          fullDescription: l.fullDescription,
-          video: l.video || undefined,
-        },
-      });
+          requestBody: {
+            language: l.language,
+            title: l.title,
+            shortDescription: l.shortDescription,
+            fullDescription: l.fullDescription,
+            video: l.video || undefined,
+          },
+        });
+        saved.push(l.language);
+      } catch (e) {
+        // Only a rejected locale is safe to skip; auth, edit and commit failures
+        // still abort the transaction so we never report uncommitted data as saved.
+        const message = googleMessage(e);
+        const unsupported = message.match(/The requested language is not currently supported:\s*([^\s.]+)/i);
+        if (!skipUnsupported || unsupported?.[1] !== l.language) throw e;
+        failed.push({ language: l.language, error: { message: `Google Play не підтримує мову «${l.language}» для опису в магазині.` } });
+      }
     }
+    if (!saved.length && failed.length) throw new ApiError(400, failed.map((f) => f.error.message).join(" "));
+    return { saved, failed };
   });
 }
 
