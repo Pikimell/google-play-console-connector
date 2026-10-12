@@ -1,5 +1,7 @@
 # Play Publisher — керування Google Play Console
 
+> A focused full-stack dashboard for managing Google Play publishing workflows through the Google Play Developer API.
+
 Панель на Next.js для роботи з Google Play Developer API (Android Publisher v3): завантаження нових версій, закрите тестування з тестувальниками, опис у магазині, графіка, відгуки.
 
 ## Запуск
