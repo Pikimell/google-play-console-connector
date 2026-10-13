@@ -1,6 +1,12 @@
-# Play Publisher — Google Play Console Publisher
+# Google Play Console Connector
 
 > A focused full-stack dashboard for managing Google Play publishing workflows through the Google Play Developer API.
+
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![Google Play API](https://img.shields.io/badge/Google_Play_Developer_API-414141?logo=googleplay&logoColor=white)
 
 A Next.js dashboard for Google Play Developer API (Android Publisher v3): releases, closed testing, store listings, graphics, subscriptions, localization, and reviews.
 
@@ -36,12 +42,16 @@ For filesystem-free hosting, use `GOOGLE_SERVICE_ACCOUNT_JSON` as raw JSON or ba
 
 ## Google Play API limitations
 
-- **Створити новий застосунок через API не можна** — лише в Play Console. Панель проводить через цей крок.
-- **Список усіх застосунків API не віддає** — застосунки додаються в панель один раз за назвою пакета.
-- **Тестувальників через API можна призначати лише Google-групами.** Email-списки Play Console через API недоступні. Панель зберігає email-и у себе, прив'язує Google-групу до треку автоматично, а для email-списків дає CSV-файл для завантаження в Play Console.
-- **Внутрішнє тестування** приймає лише email-списки — їх задають у Play Console один раз.
-- **Обов'язкові анкети** (вікова категорія, безпека даних, реклама, цільова аудиторія тощо) заповнюються лише в Play Console. Поки вони не заповнені, релізи можна зберігати тільки як чернетки.
-- **Підписки** можна створювати лише після завантаження збірки з Google Play Billing Library (дозвіл `com.android.vending.BILLING`) і за наявності платіжного профілю. Міграцію чинних підписників на нову ціну та пропозиції (пробний період, знижки) поки що робимо в Play Console.
+- **Apps cannot be created via the API.** This is only possible in Play Console, and the dashboard guides you through that step.
+- **The API does not list all apps.** Each app is added to the dashboard once by its package name.
+- **Testers can only be assigned through Google Groups.** Play Console email lists are not available via the API. The dashboard stores emails itself, binds a Google Group to the track automatically, and exports a CSV for email lists.
+- **Internal testing** accepts only email lists, which are configured once in Play Console.
+- **Mandatory questionnaires** (content rating, data safety, ads, target audience) can only be completed in Play Console. Until then, releases can only be saved as drafts.
+- **Subscriptions** can only be created after uploading a build with the Google Play Billing Library (`com.android.vending.BILLING`) and with a payments profile. Migrating existing subscribers to a new price and offers (trials, discounts) are still handled in Play Console.
 - **Reviews:** the API returns text reviews from the last seven days only.
 
 The Ukrainian documentation is available in [README-uk.md](README-uk.md).
+
+## Author
+
+**Volodymyr Pashchenko**, Full-stack Developer · [GitHub](https://github.com/Pikimell) · [LinkedIn](https://www.linkedin.com/in/pashchenko-v-r)
