@@ -1,46 +1,57 @@
-# Play Publisher — керування Google Play Console
+# Google Play Console Connector
 
-Панель на Next.js для роботи з Google Play Developer API (Android Publisher v3): завантаження нових версій, закрите тестування з тестувальниками, опис у магазині, графіка, відгуки.
+> A focused full-stack dashboard for managing Google Play publishing workflows through the Google Play Developer API.
 
-## Запуск
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![Google Play API](https://img.shields.io/badge/Google_Play_Developer_API-414141?logo=googleplay&logoColor=white)
+
+A Next.js dashboard for Google Play Developer API (Android Publisher v3): releases, closed testing, store listings, graphics, subscriptions, localization, and reviews.
+
+## Getting started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Відкрий http://localhost:3000 → «Підключення» — там покрокова перевірка.
+Open http://localhost:3000 and use the Connection page for the guided setup.
 
-## Що куди покласти
+## Configuration
 
-| Що | Куди |
+| Item | Location |
 |---|---|
-| JSON-ключ сервісного акаунта | `credentials/service-account.json` |
-| Пароль на панель (рекомендовано) | `.env.local` → `ADMIN_PASSWORD=...` |
-| OpenAI для перекладів (необов'язково) | `.env.local` → `OPENAI_API_KEY=...`, `OPENAI_MODEL=...` (за замовчуванням `gpt-5-mini`) |
+| Google service-account JSON | `credentials/service-account.json` |
+| Optional dashboard password | `.env.local` → `ADMIN_PASSWORD=...` |
+| Optional OpenAI translation key | `.env.local` → `OPENAI_API_KEY=...`, `OPENAI_MODEL=...` |
 
-Для хостингу без файлової системи замість файлу можна задати `GOOGLE_SERVICE_ACCOUNT_JSON` (вміст JSON або base64). Зверни увагу: список застосунків і групи тестувальників зберігаються у `data/store.json`, тому на serverless-хостингу (Vercel) вони не збережуться. Найкраще запускати панель локально або на VPS.
+For filesystem-free hosting, use `GOOGLE_SERVICE_ACCOUNT_JSON` as raw JSON or base64. Applications and tester groups are stored in `data/store.json`, so they are not persistent on serverless hosting such as Vercel. Local or VPS deployment is recommended.
 
-## Сторінки
+## Main areas
 
-- **Головна** — швидкі дії й список застосунків.
-- **Підключення** — перевірка ключа і покрокова інструкція з доступу.
-- **Додати застосунок** — підключити наявний або покроково створити новий.
-- **Застосунок → Огляд** — що зараз опубліковано на кожному треку.
-- **Нова версія** — майстер: файл AAB/APK → трек → «Що нового» → публікація (одразу, поступово або чернетка).
-- **Релізи й треки** — змінити відсоток розгортання, пауза/відновлення, 100%, перенести версію в інший трек.
-- **Закрите тестування** — список треків, майстер створення нового тестування, керування тестувальниками треку.
-- **Опис у магазині**, **Графіка**, **Контакти**, **Відгуки**.
-- **Підписки** — створення підписок, назва/опис/переваги різними мовами, базові плани (тиждень…рік, автопродовження або передплата), ціна з автоматичним перерахунком у всі країни, активація/деактивація планів.
-- **Локалізація** — переклад опису через OpenAI: мова оригіналу → вибрані мови → переклади одразу зберігаються в Google Play; окрема кнопка перекладу для кожної мови.
-- **Тестувальники** — групи email-адрес, спільні для всіх застосунків (копіювання, CSV для Play Console).
+- **Overview** — applications and quick actions.
+- **Connection** — credential validation and setup guidance.
+- **Releases** — upload AAB/APK files, select tracks, publish immediately, progressively, or as drafts.
+- **Closed testing** — tracks and tester management.
+- **Store listing and graphics** — localized metadata and assets.
+- **Subscriptions** — products, base plans, prices, and activation.
+- **Localization** — translate store copy with OpenAI and save it to Google Play.
+- **Testers** — reusable email groups and CSV export for Play Console.
 
-## Обмеження Google Play API (і як панель їх обходить)
+## Google Play API limitations
 
-- **Створити новий застосунок через API не можна** — лише в Play Console. Панель проводить через цей крок.
-- **Список усіх застосунків API не віддає** — застосунки додаються в панель один раз за назвою пакета.
-- **Тестувальників через API можна призначати лише Google-групами.** Email-списки Play Console через API недоступні. Панель зберігає email-и у себе, прив'язує Google-групу до треку автоматично, а для email-списків дає CSV-файл для завантаження в Play Console.
-- **Внутрішнє тестування** приймає лише email-списки — їх задають у Play Console один раз.
-- **Обов'язкові анкети** (вікова категорія, безпека даних, реклама, цільова аудиторія тощо) заповнюються лише в Play Console. Поки вони не заповнені, релізи можна зберігати тільки як чернетки.
-- **Підписки** можна створювати лише після завантаження збірки з Google Play Billing Library (дозвіл `com.android.vending.BILLING`) і за наявності платіжного профілю. Міграцію чинних підписників на нову ціну та пропозиції (пробний період, знижки) поки що робимо в Play Console.
-- **Відгуки**: API повертає лише відгуки з текстом за останні 7 днів.
+- **Apps cannot be created via the API.** This is only possible in Play Console, and the dashboard guides you through that step.
+- **The API does not list all apps.** Each app is added to the dashboard once by its package name.
+- **Testers can only be assigned through Google Groups.** Play Console email lists are not available via the API. The dashboard stores emails itself, binds a Google Group to the track automatically, and exports a CSV for email lists.
+- **Internal testing** accepts only email lists, which are configured once in Play Console.
+- **Mandatory questionnaires** (content rating, data safety, ads, target audience) can only be completed in Play Console. Until then, releases can only be saved as drafts.
+- **Subscriptions** can only be created after uploading a build with the Google Play Billing Library (`com.android.vending.BILLING`) and with a payments profile. Migrating existing subscribers to a new price and offers (trials, discounts) are still handled in Play Console.
+- **Reviews:** the API returns text reviews from the last seven days only.
+
+The Ukrainian documentation is available in [README-uk.md](README-uk.md).
+
+## Author
+
+**Volodymyr Pashchenko**, Full-stack Developer · [GitHub](https://github.com/Pikimell) · [LinkedIn](https://www.linkedin.com/in/pashchenko-v-r)
