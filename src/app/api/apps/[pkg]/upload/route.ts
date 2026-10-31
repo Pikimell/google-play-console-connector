@@ -8,7 +8,7 @@ import { discardEdit, getPublisher, pinEdit, withEditLock } from "@/lib/google";
 import { assertPackage } from "@/lib/play";
 import { ApiError } from "@/lib/errors";
 
-export const maxDuration = 1800;
+export const maxDuration = 300;
 
 /**
  * Крок 1 майстра релізу: приймаємо AAB/APK, створюємо edit і завантажуємо файл у Google Play.
