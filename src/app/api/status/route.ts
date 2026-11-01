@@ -2,7 +2,6 @@ import { connection } from "next/server";
 import { loadCredentials, getPublisher, googleMessage } from "@/lib/google";
 import { authEnabled } from "@/lib/auth";
 import { route } from "@/lib/route";
-import { listApps } from "@/lib/store";
 import { ApiError, humanizeError } from "@/lib/errors";
 import { checkOpenAI, openaiConfig } from "@/lib/openai";
 
@@ -22,8 +21,8 @@ export const GET = route(async (req) => {
       ? { ok: true, source: creds.source, email: creds.key.client_email, projectId: creds.key.project_id }
       : { ok: false, source: creds.source, error: creds.error },
     passwordEnabled: authEnabled(),
-    appsCount: (await listApps()).length,
-    openai: { configured: openaiConfig().configured, model: openaiConfig().model, customModel: Boolean(process.env.OPENAI_MODEL?.trim()) },
+    appsCount: 0,
+    openai: { configured: openaiConfig().configured, model: openaiConfig().model, customModel: openaiConfig().model !== "gpt-5-mini" },
   };
   if (deep && result.openai.configured) {
     try {

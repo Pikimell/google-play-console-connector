@@ -3,6 +3,9 @@ import { ApiError, humanizeError } from "./errors";
 import { googleMessage } from "./google";
 import { isValidSession, readCookie, SESSION_COOKIE } from "./auth";
 
+import { withConnection } from "./request-context";
+import { parseSettings } from "./connection-settings";
+
 type Ctx<P> = { params: Promise<P> };
 
 /**
@@ -14,9 +17,19 @@ export function route<P = Record<string, string>>(fn: (req: Request, params: P) 
     try {
       const ok = await isValidSession(readCookie(req.headers.get("cookie"), SESSION_COOKIE));
       if (!ok) throw new ApiError(401, "Потрібно увійти.");
+      const header = req.headers.get("X-Play-Connection");
+      let settings;
+      try {
+        if (header && header.length > 12000) throw new Error();
+        settings = parseSettings(header ? JSON.parse(Buffer.from(header, "base64").toString("utf8")) : {});
+      } catch {
+        throw new ApiError(400, "Некоректні налаштування підключення. Перевір їх на сторінці «Підключення».");
+      }
       const params = ctx?.params ? await ctx.params : ({} as P);
-      const data = await fn(req, params);
-      return Response.json(data ?? { ok: true });
+      return await withConnection(settings, async () => {
+        const data = await fn(req, params);
+        return Response.json(data ?? { ok: true }, { headers: { "Cache-Control": "no-store" } });
+      });
     } catch (e) {
       return errorResponse(e);
     }

@@ -1,4 +1,5 @@
 "use client";
+import { connectionHeaders } from "@/lib/browser-storage";
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Plus, Users } from "lucide-react";
 import { useApp } from "@/components/apps-context";
@@ -36,7 +37,7 @@ export default function NewClosedTestingPage() {
   }, [uploaded, result]);
   useEffect(() => {
     const drop = () => {
-      if (openEdit.current) void fetch(`/api/apps/${enc(pkg)}/edits/${enc(openEdit.current)}`, { method: "DELETE", keepalive: true });
+      if (openEdit.current) void fetch(`/api/apps/${enc(pkg)}/edits/${enc(openEdit.current)}`, { method: "DELETE", keepalive: true, headers: connectionHeaders(`/api/apps/${enc(pkg)}/edits/${enc(openEdit.current)}`) });
       openEdit.current = null;
     };
     window.addEventListener("pagehide", drop);

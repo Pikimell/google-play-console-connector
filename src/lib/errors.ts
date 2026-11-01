@@ -13,6 +13,11 @@ type Known = { test: RegExp; message: string; hint?: string };
 /** Найчастіші помилки Google Play API з людським поясненням. */
 const KNOWN: Known[] = [
   {
+    test: /DECODER routines|PEM routines|secretOrPrivateKey.*(?:invalid|asymmetric)/i,
+    message: "Приватний ключ у JSON пошкоджений або має неправильний формат.",
+    hint: "Завантаж новий JSON-ключ сервісного акаунта з Google Cloud на сторінці «Підключення».",
+  },
+  {
     test: /caller does not have permission|permission denied|insufficient permissions/i,
     message: "Сервісний акаунт не має доступу до цього застосунку.",
     hint: "Play Console → «Користувачі й дозволи» → запроси email сервісного акаунта й дай йому доступ до застосунку (адмін або права на релізи/тестування/інформацію в магазині). Нові права іноді починають діяти через кілька хвилин.",

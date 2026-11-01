@@ -1,4 +1,5 @@
 "use client";
+import { connectionHeaders } from "@/lib/browser-storage";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, FlaskConical, Globe, Lock, Rocket, Users } from "lucide-react";
@@ -39,7 +40,7 @@ function ReleaseWizard() {
   useEffect(() => {
     const drop = () => {
       if (openEdit.current) {
-        void fetch(`/api/apps/${enc(pkg)}/edits/${enc(openEdit.current)}`, { method: "DELETE", keepalive: true });
+        void fetch(`/api/apps/${enc(pkg)}/edits/${enc(openEdit.current)}`, { method: "DELETE", keepalive: true, headers: connectionHeaders(`/api/apps/${enc(pkg)}/edits/${enc(openEdit.current)}`) });
         openEdit.current = null;
       }
     };

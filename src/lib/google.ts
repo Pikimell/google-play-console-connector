@@ -1,72 +1,25 @@
 import "server-only";
-import fs from "node:fs";
-import path from "node:path";
 import { google, type androidpublisher_v3 } from "googleapis";
 import { ApiError } from "./errors";
+import { connectionContext, connectionIdentity } from "./request-context";
 
 export type Publisher = androidpublisher_v3.Androidpublisher;
 
-type ServiceAccountKey = {
-  type?: string;
-  project_id?: string;
-  client_email: string;
-  private_key: string;
-};
-
-type CredentialsState =
-  | { ok: true; key: ServiceAccountKey; source: string }
-  | { ok: false; error: string; source: string };
-
-const DEFAULT_KEY_FILE = "./credentials/service-account.json";
-
-export function loadCredentials(): CredentialsState {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim();
-  if (raw) {
-    const source = "змінна GOOGLE_SERVICE_ACCOUNT_JSON";
-    try {
-      const json = raw.startsWith("{") ? raw : Buffer.from(raw, "base64").toString("utf8");
-      return validateKey(JSON.parse(json), source);
-    } catch {
-      return { ok: false, source, error: "Не вдалося розібрати JSON з GOOGLE_SERVICE_ACCOUNT_JSON." };
-    }
-  }
-
-  const file = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE || process.env.GOOGLE_APPLICATION_CREDENTIALS || DEFAULT_KEY_FILE;
-  const abs = path.resolve(/*turbopackIgnore: true*/ process.cwd(), file);
-  const source = `файл ${file}`;
-  if (!fs.existsSync(abs)) {
-    return { ok: false, source, error: `Файл ключа не знайдено: ${abs}` };
-  }
-  try {
-    return validateKey(JSON.parse(fs.readFileSync(abs, "utf8")), source);
-  } catch {
-    return { ok: false, source, error: `Файл ${file} не є коректним JSON.` };
-  }
+export function loadCredentials() {
+  const key = connectionContext().settings.google;
+  const source = "цей браузер";
+  return key ? { ok: true as const, key, source }
+    : { ok: false as const, source, error: "Завантаж JSON-ключ на сторінці «Підключення»." };
 }
-
-function validateKey(key: Partial<ServiceAccountKey>, source: string): CredentialsState {
-  if (!key.client_email || !key.private_key) {
-    return { ok: false, source, error: "У JSON немає client_email або private_key — це точно ключ сервісного акаунта?" };
-  }
-  return { ok: true, source, key: key as ServiceAccountKey };
-}
-
-let cached: { publisher: Publisher; email: string } | null = null;
 
 export function getPublisher(): Publisher {
-  if (cached) return cached.publisher;
+  const ctx = connectionContext();
+  if (ctx.publisher) return ctx.publisher;
   const creds = loadCredentials();
-  if (!creds.ok) {
-    throw new ApiError(500, creds.error, "Відкрий сторінку «Налаштування» — там покроково описано, куди покласти ключ.");
-  }
-  const auth = new google.auth.JWT({
-    email: creds.key.client_email,
-    key: creds.key.private_key,
-    scopes: ["https://www.googleapis.com/auth/androidpublisher"],
-  });
-  const publisher = google.androidpublisher({ version: "v3", auth, timeout: 30 * 60 * 1000 });
-  cached = { publisher, email: creds.key.client_email };
-  return publisher;
+  if (!creds.ok) throw new ApiError(400, creds.error);
+  const auth = new google.auth.JWT({ email: creds.key.client_email, key: creds.key.private_key,
+    scopes: ["https://www.googleapis.com/auth/androidpublisher"] });
+  return ctx.publisher = google.androidpublisher({ version: "v3", auth, timeout: 30 * 60 * 1000 });
 }
 
 // ---------- Координація edit-сесій ----------
@@ -91,10 +44,11 @@ const g = globalThis as unknown as { __gpcEdits?: Map<string, PkgState> };
 const states = (g.__gpcEdits ??= new Map());
 
 function state(pkg: string): PkgState {
-  let s = states.get(pkg);
+  const scopedPkg = `${connectionIdentity()}:${pkg}`;
+  let s = states.get(scopedPkg);
   if (!s) {
     s = { readers: 0, shared: null, deleting: null, pendingWriters: 0, writerChain: Promise.resolve(), pinned: null, idle: [] };
-    states.set(pkg, s);
+    states.set(scopedPkg, s);
   }
   return s;
 }

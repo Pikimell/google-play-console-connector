@@ -6,3 +6,4 @@
 (2026-10-13) - Оновили README: опис проєкту, стек, архітектура та запуск англійською для роботодавців (docs: rewrite README for portfolio presentation)
 (2026-10-15) - Вирішили конфлікт журналу змін і завершили об’єднання локальної та віддаленої історії (fix: resolve updates log merge conflict)
 (2026-11-01) - Виправили збірку на Vercel Hobby: обмежили виконання upload-функції до 300 секунд (fix: limit upload duration for Vercel Hobby)
+(2026-11-01) - Додали підключення Google JSON і OpenAI через сайт без реєстрації, браузерне зберігання ключів і даних та ізоляцію API-запитів (feat: add browser-only user connections and settings)

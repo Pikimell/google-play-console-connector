@@ -112,7 +112,7 @@ export default function LocalizePage() {
 
       {status.data && !openaiReady && (
         <Alert tone="warning" className="mb-4" title="OpenAI не підключено" action={<LinkButton size="sm" href="/setup">Підключити</LinkButton>}>
-          Додай OPENAI_API_KEY у .env.local — інструкція на сторінці «Підключення».
+          Додай власний OpenAI API-ключ на сторінці «Підключення».
         </Alert>
       )}
       <ErrorBox error={listingsApi.error} onRetry={listingsApi.reload} className="mb-4" />

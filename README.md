@@ -21,13 +21,19 @@ Open http://localhost:3000 and use the Connection page for the guided setup.
 
 ## Configuration
 
-| Item | Location |
-|---|---|
-| Google service-account JSON | `credentials/service-account.json` |
-| Optional dashboard password | `.env.local` → `ADMIN_PASSWORD=...` |
-| Optional OpenAI translation key | `.env.local` → `OPENAI_API_KEY=...`, `OPENAI_MODEL=...` |
+Users configure everything on **Connection** (`/setup`):
 
-For filesystem-free hosting, use `GOOGLE_SERVICE_ACCOUNT_JSON` as raw JSON or base64. Applications and tester groups are stored in `data/store.json`, so they are not persistent on serverless hosting such as Vercel. Local or VPS deployment is recommended.
+- Upload the Google Cloud service-account JSON key.
+- Enable the Android Publisher API and grant the service-account email access in Play Console.
+- Optionally enter an OpenAI API key and choose a translation model.
+
+No registration is required. Keys, app lists, hidden tracks and tester groups live in this browser's `localStorage`, separated by Google service-account email. Clearing site data removes them. Use a trusted personal device; browser scripts on this origin can access local storage.
+
+The browser sends the necessary credentials to this site's API over HTTPS for each Google/OpenAI operation. The server uses request-scoped clients and does not persist credentials or panel data. There is no fallback to server environment credentials or local JSON files, so a visitor cannot use the deployment owner's keys. Old `data/store.json` data is not imported automatically.
+
+Deploy on Vercel or another Next.js host with HTTPS. Leave `ADMIN_PASSWORD` unset for public access; it remains an optional site-wide gate for private deployments. No database or user-key environment variables are needed.
+
+The upload function runs for at most 300 seconds on Vercel Hobby. Vercel's request-size limits still apply to AAB/APK and image uploads; browser settings do not remove those hosting limits.
 
 ## Main areas
 

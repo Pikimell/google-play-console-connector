@@ -3,19 +3,21 @@ import { ApiError } from "./errors";
 import { languageEnglishName } from "./tracks";
 import type { Listing } from "./types";
 
+import { connectionContext } from "./request-context";
+
 export const DEFAULT_OPENAI_MODEL = "gpt-5-mini";
 
 export function openaiConfig() {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  const model = process.env.OPENAI_MODEL?.trim() || DEFAULT_OPENAI_MODEL;
-  const baseUrl = (process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1").replace(/\/$/, "");
+  const apiKey = connectionContext().settings.openaiKey?.trim();
+  const model = connectionContext().settings.openaiModel?.trim() || DEFAULT_OPENAI_MODEL;
+  const baseUrl = "https://api.openai.com/v1";
   return { apiKey, model, baseUrl, configured: Boolean(apiKey) };
 }
 
 function requireConfig() {
   const c = openaiConfig();
   if (!c.apiKey) {
-    throw new ApiError(400, "OpenAI не підключено.", "Додай OPENAI_API_KEY у файл .env.local і перезапусти панель. Деталі — на сторінці «Підключення».");
+    throw new ApiError(400, "OpenAI не підключено.", "Додай API-ключ на сторінці «Підключення».");
   }
   return c as typeof c & { apiKey: string };
 }
@@ -29,9 +31,9 @@ async function openaiFetch(path: string, init?: RequestInit) {
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     const msg: string = data?.error?.message ?? `OpenAI повернув помилку ${res.status}`;
-    if (res.status === 401) throw new ApiError(502, "OpenAI не прийняв API-ключ.", "Перевір OPENAI_API_KEY у .env.local (ключ можна створити на platform.openai.com/api-keys).");
+    if (res.status === 401) throw new ApiError(502, "OpenAI не прийняв API-ключ.", "Перевір API-ключ на сторінці «Підключення».");
     if (res.status === 404 || (/model/i.test(msg) && /does not exist|not found|access/i.test(msg))) {
-      throw new ApiError(502, `Модель «${c.model}» недоступна для твого ключа.`, "Зміни OPENAI_MODEL у .env.local (наприклад gpt-5-mini або gpt-4.1-mini).");
+      throw new ApiError(502, `Модель «${c.model}» недоступна для твого ключа.`, "Зміни модель на сторінці «Підключення» (наприклад gpt-5-mini).");
     }
     if (res.status === 429) throw new ApiError(429, "OpenAI: перевищено ліміт або закінчився баланс.", msg);
     throw new ApiError(502, `OpenAI: ${msg}`);

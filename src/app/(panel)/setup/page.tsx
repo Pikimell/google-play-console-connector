@@ -1,138 +1,137 @@
 "use client";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { CheckCircle2, Circle, ExternalLink, XCircle } from "lucide-react";
-import { Alert, Badge, Button, Card, CopyButton, PageHeader, Spinner, cn } from "@/components/ui";
+import { Alert, Badge, Button, Card, CopyButton, Field, Input, PageHeader } from "@/components/ui";
 import { useApi } from "@/lib/hooks";
+import { useApps } from "@/components/apps-context";
+import { clearBrowserData, readSettings, saveSettings, settingsSnapshot, subscribeSettings } from "@/lib/browser-storage";
+import { parseSettings, parseServiceAccount, type ConnectionSettings } from "@/lib/connection-settings";
 
 type Status = {
-  credentials: { ok: boolean; source: string; error?: string; email?: string; projectId?: string };
+  credentials: { ok: boolean; error?: string; email?: string; projectId?: string };
   token?: { ok: boolean; error?: string; hint?: string };
-  passwordEnabled: boolean;
-  appsCount: number;
-  openai: { configured: boolean; model: string; customModel: boolean; ok?: boolean; error?: string; hint?: string };
+  openai: { configured: boolean; model: string; ok?: boolean; error?: string; hint?: string };
 };
-
-function Step({ n, state, title, children }: { n: number; state: "ok" | "fail" | "todo"; title: string; children: React.ReactNode }) {
-  return (
-    <Card className="flex gap-4 p-5">
-      <div className="pt-0.5">
-        {state === "ok" ? <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400" /> : state === "fail" ? <XCircle className="size-6 text-red-600 dark:text-red-400" /> : <Circle className="size-6 text-gray-300 dark:text-gray-600" />}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="mb-1 text-xs font-semibold tracking-wide text-gray-400 uppercase">Крок {n}</div>
-        <h3 className={cn("mb-2 font-semibold", state === "fail" ? "text-red-800 dark:text-red-300" : "text-gray-900 dark:text-gray-100")}>{title}</h3>
-        <div className="space-y-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">{children}</div>
-      </div>
-    </Card>
-  );
-}
-
-const ext = (href: string, text: string) => (
-  <a href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-brand-700 dark:text-emerald-300 hover:underline">
-    {text} <ExternalLink className="size-3.5" />
-  </a>
-);
+const ext = (href: string, text: string) => <a href={href} target="_blank" rel="noreferrer" className="font-medium text-brand-700 dark:text-emerald-300 hover:underline">{text} ↗</a>;
 
 export default function SetupPage() {
-  const { data, loading, reload } = useApi<Status>("/api/status?check=1");
-  if (loading && !data) return <Spinner label="Перевіряю підключення…" />;
-  const c = data?.credentials;
-  const email = c?.email ?? "";
-  const keyState = c?.ok ? (data?.token?.ok === false ? "fail" : "ok") : "fail";
+  const { data, error, loading, reload } = useApi<Status>("/api/status?check=1");
+  const apps = useApps();
+  const snapshot = useSyncExternalStore(subscribeSettings, settingsSnapshot, () => "{}");
+  const stored = useMemo(() => {
+    try { return { settings: parseSettings(JSON.parse(snapshot)), error: undefined }; }
+    catch { return { settings: {} as ConnectionSettings, error: "Не вдалося прочитати налаштування браузера. Перевір доступ до локального сховища або очисть дані кнопкою нижче." }; }
+  }, [snapshot]);
+  const settings = stored.settings;
+  const [openaiKey, setOpenaiKey] = useState("");
+  const [model, setModel] = useState<string>();
+  const selectedModel = model ?? settings.openaiModel ?? "gpt-5-mini";
+  const [message, setMessage] = useState<string>();
+  const [problem, setProblem] = useState<string>();
+  const [busy, setBusy] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
 
-  return (
-    <>
-      <PageHeader
-        title="Підключення до Google Play"
-        description="Один раз проходиш ці кроки — і далі все робиться з панелі."
-        actions={<Button variant="secondary" loading={loading} onClick={reload}>Перевірити ще раз</Button>}
-      />
-      <div className="space-y-4">
-        <Step n={1} state={keyState} title="JSON-ключ сервісного акаунта">
-          {c?.ok ? (
-            <>
-              <p>Ключ знайдено ({c.source}).{data?.token?.ok && " Google успішно видав токен доступу."}</p>
-              {data?.token?.ok === false && <Alert tone="error" title={data.token.error}>{data.token.hint}</Alert>}
-            </>
-          ) : (
-            <>
-              <Alert tone="error" title="Ключ не знайдено">{c?.error}</Alert>
-              <p>Поклади завантажений JSON-файл у папку проєкту ось так:</p>
-              <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs text-gray-100">credentials/service-account.json</pre>
-              <p>Після цього перезапусти <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">npm run dev</code> і натисни «Перевірити ще раз».</p>
-            </>
-          )}
-        </Step>
+  async function persist(next: ConnectionSettings) {
+    saveSettings(next);
+    setMessage("Збережено в цьому браузері.");
+    await Promise.all([reload(), apps.reload()]);
+  }
 
-        <Step n={2} state="todo" title="Увімкнути Google Play Android Developer API">
-          <p>У Google Cloud проєкті, де створений сервісний акаунт, має бути увімкнений цей API.</p>
-          <p>{ext(`https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com${c?.projectId ? `?project=${c.projectId}` : ""}`, "Відкрити сторінку API і натиснути «Enable»")}</p>
-          <p className="text-gray-500 dark:text-gray-400">Якщо вже увімкнено — просто пропусти цей крок.</p>
-        </Step>
+  async function upload(file?: File) {
+    if (!file) return;
+    setBusy(true); setProblem(undefined); setMessage(undefined);
+    try {
+      if (file.size > 12000) throw new Error("Файл завеликий. Обери JSON-ключ сервісного акаунта (до 12 КБ).");
+      const google = parseServiceAccount(JSON.parse(await file.text()));
+      // Reject oversized credentials before they exceed HTTP header limits.
+      if (new TextEncoder().encode(JSON.stringify(google)).length > 5500) throw new Error("JSON-ключ завеликий для підключення.");
+      await persist({ ...readSettings(), google });
+    } catch (e) { setProblem(e instanceof SyntaxError ? "Файл не є коректним JSON." : e instanceof Error ? e.message : "Не вдалося завантажити ключ."); }
+    finally { setBusy(false); }
+  }
 
-        <Step n={3} state={data && data.appsCount > 0 ? "ok" : "todo"} title="Дати сервісному акаунту доступ у Play Console">
-          {email && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-950 p-3">
-              <code className="font-mono text-sm break-all">{email}</code>
-              <CopyButton text={email} />
-            </div>
-          )}
-          <ol className="list-decimal space-y-1 pl-5">
-            <li>{ext("https://play.google.com/console/developers/users-and-permissions", "Play Console → Користувачі й дозволи")} → «Запросити нових користувачів».</li>
-            <li>Встав email вище.</li>
-            <li>
-              На вкладці <b>«Дозволи облікового запису»</b> найпростіше дати <b>«Адміністратор (усі дозволи)»</b> — тоді доступ буде до всіх наявних і майбутніх застосунків.
-              Мінімально потрібні: перегляд інформації про застосунок, керування релізами в робочій версії й тестових треках, керування тестувальниками, редагування сторінки в магазині, відповіді на відгуки.
-            </li>
-            <li>Натисни «Запросити» — підтверджувати нічого не потрібно.</li>
-          </ol>
-          <p className="text-gray-500 dark:text-gray-400">Права інколи починають діяти через кілька хвилин (зрідка — до доби).</p>
-        </Step>
+  async function saveOpenAI(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setProblem(undefined); setMessage(undefined);
+    try {
+      const next = { ...readSettings(), openaiModel: selectedModel.trim(), openaiKey: openaiKey.trim() || settings.openaiKey };
+      await persist(next);
+      setOpenaiKey("");
+    } catch (e) { setProblem(e instanceof Error ? e.message : "Не вдалося зберегти ключ."); }
+    finally { setBusy(false); }
+  }
 
-        <Step n={4} state={data && data.appsCount > 0 ? "ok" : "todo"} title="Додати застосунки в панель">
-          <p>
-            {data?.appsCount ? <>Додано застосунків: <Badge tone="green">{data.appsCount}</Badge>. </> : null}
-            Вкажи назву пакета — панель перевірить доступ і запам&apos;ятає застосунок.
-          </p>
-          <Link href="/apps/new" className="font-medium text-brand-700 dark:text-emerald-300 hover:underline">Додати застосунок →</Link>
-        </Step>
+  async function disconnect(kind: "google" | "openai") {
+    setBusy(true); setProblem(undefined); setMessage(undefined);
+    try {
+      const next = { ...readSettings() };
+      if (kind === "google") delete next.google;
+      else { delete next.openaiKey; delete next.openaiModel; setOpenaiKey(""); setModel(undefined); }
+      await persist(next);
+    } catch (e) { setProblem(e instanceof Error ? e.message : "Не вдалося видалити ключ."); }
+    finally { setBusy(false); }
+  }
 
-        <Step n={5} state={data?.passwordEnabled ? "ok" : "todo"} title="Пароль на панель (рекомендовано)">
-          {data?.passwordEnabled ? (
-            <p>Пароль увімкнено. Панель захищена.</p>
-          ) : (
-            <>
-              <p>Зараз панель відкрита без пароля. Для локального запуску це нормально, але якщо розгортатимеш її на сервері — обов&apos;язково додай у файл <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">.env.local</code>:</p>
-              <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs text-gray-100">ADMIN_PASSWORD=придумай-надійний-пароль</pre>
-            </>
-          )}
-        </Step>
-      </div>
-
-      <h2 className="mt-10 mb-1 text-lg font-semibold">Додатково: OpenAI для автоматичного перекладу</h2>
-      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">Потрібно лише для сторінки «Локалізація» — перекладу опису в магазині на інші мови.</p>
-      <Step n={6} state={data?.openai.ok ? "ok" : data?.openai.configured && data.openai.ok === false ? "fail" : "todo"} title="Підключити OpenAI (ChatGPT)">
-        {data?.openai.configured ? (
-          data.openai.ok ? (
-            <p>
-              Підключено. Модель: <Badge tone="green">{data.openai.model}</Badge>
-              {!data.openai.customModel && <span className="text-gray-500 dark:text-gray-400"> (за замовчуванням — дешева й якісна для перекладів)</span>}
-            </p>
-          ) : (
-            <Alert tone="error" title={data.openai.error ?? "OpenAI недоступний"}>{data.openai.hint}</Alert>
-          )
-        ) : (
-          <p>Ключ ще не додано.</p>
-        )}
-        <ol className="list-decimal space-y-1 pl-5">
-          <li>Створи API-ключ: {ext("https://platform.openai.com/api-keys", "platform.openai.com → API keys")} (на акаунті має бути поповнений баланс).</li>
-          <li>Додай у файл <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">.env.local</code> у корені проєкту:</li>
+  return <>
+    <PageHeader title="Підключення" description="Додай власні ключі та керуй Google Play із цього браузера. Реєстрація не потрібна."
+      actions={<Button variant="secondary" loading={loading} disabled={busy} onClick={reload}>Перевірити підключення</Button>} />
+    <div className="space-y-5">
+      <Alert title="Налаштування зберігаються лише в цьому браузері">
+        JSON-ключ і OpenAI-ключ зберігаються в локальному сховищі браузера та передаються серверу сайту для виконання запитів до Google й OpenAI.
+        Сервер не записує їх у файли чи базу даних. Використовуй власний пристрій. Після очищення даних браузера ключі й списки потрібно додати знову.
+      </Alert>
+      {(problem || stored.error || error) && <Alert tone="error" title={problem || stored.error || error?.message} />}
+      {message && <Alert tone="success" title={message} />}
+      <Card className="space-y-4 p-5">
+        <h2 className="text-lg font-semibold">1. JSON-ключ Google Play</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400">У Google Cloud створи сервісний акаунт, відкрий «Keys → Add key → Create new key → JSON» і завантаж отриманий файл тут.</p>
+        <p className="text-sm">{ext("https://console.cloud.google.com/iam-admin/serviceaccounts", "Відкрити сервісні акаунти Google Cloud")}</p>
+        <Field label={settings.google ? "Замінити JSON-ключ" : "Завантажити JSON-ключ"}>
+          <Input type="file" accept=".json,application/json" disabled={busy} onChange={e => { void upload(e.target.files?.[0]); e.target.value = ""; }} />
+        </Field>
+        {settings.google && <>
+          <div className="flex flex-wrap items-center gap-2 text-sm"><code className="break-all">{settings.google.client_email}</code><CopyButton text={settings.google.client_email} /></div>
+          {data?.token?.ok && <Badge tone="green">Google видав токен доступу</Badge>}
+          {data?.token?.ok === false && <Alert tone="error" title={data.token.error}>{data.token.hint}</Alert>}
+          <Button variant="secondary" disabled={busy} onClick={() => disconnect("google")}>Видалити Google-ключ із браузера</Button>
+        </>}
+      </Card>
+      <Card className="space-y-3 p-5">
+        <h2 className="text-lg font-semibold">2. Доступ до Google Play</h2>
+        <ol className="list-decimal space-y-3 pl-5 text-sm leading-relaxed">
+          <li>{ext(`https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com${settings.google?.project_id ? `?project=${encodeURIComponent(settings.google.project_id)}` : ""}`, "Увімкни Google Play Android Developer API")} у проєкті сервісного акаунта.</li>
+          <li>У {ext("https://play.google.com/console/developers/users-and-permissions", "Play Console → Користувачі й дозволи")} запроси email сервісного акаунта, вказаний вище. Дай доступ до потрібних застосунків і дій: релізів, тестування, описів або відгуків. Права можуть почати діяти із затримкою.</li>
+          <li><Link href="/apps/new" className="font-medium text-brand-700 dark:text-emerald-300 hover:underline">Додай застосунок за назвою пакета →</Link> Google API не надає автоматичного списку застосунків.</li>
         </ol>
-        <pre className="rounded-lg bg-gray-900 p-3 font-mono text-xs leading-relaxed text-gray-100">{`OPENAI_API_KEY=sk-...
-# необов'язково, за замовчуванням ${data?.openai.model && !data.openai.customModel ? data.openai.model : "gpt-5-mini"}
-OPENAI_MODEL=gpt-5-mini`}</pre>
-        <p>Перезапусти <code className="rounded bg-gray-100 dark:bg-gray-800 px-1">npm run dev</code> (зміни в .env підхоплюються лише після перезапуску) і натисни «Перевірити ще раз».</p>
-      </Step>
-    </>
-  );
+      </Card>
+      <Card className="space-y-4 p-5">
+        <h2 className="text-lg font-semibold">3. OpenAI для перекладу (необов’язково)</h2>
+        <p className="text-sm">Створи ключ на {ext("https://platform.openai.com/api-keys", "сторінці API keys")}. Оплата перекладів відбувається з твого акаунта OpenAI.</p>
+        {data?.openai.ok && <Badge tone="green">Підключено: {data.openai.model}</Badge>}
+        {data?.openai.ok === false && <Alert tone="error" title={data.openai.error}>{data.openai.hint}</Alert>}
+        <form onSubmit={saveOpenAI} className="space-y-4">
+          <Field label="OpenAI API-ключ" hint={settings.openaiKey ? "Ключ уже збережено. Залиш поле порожнім, щоб зберегти поточний." : undefined}>
+            <Input type="password" autoComplete="off" value={openaiKey} onChange={e => setOpenaiKey(e.target.value)} placeholder={settings.openaiKey ? "Ключ збережено" : "sk-…"} />
+          </Field>
+          <Field label="Модель"><Input required value={selectedModel} onChange={e => setModel(e.target.value)} placeholder="gpt-5-mini" /></Field>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" loading={busy}>Зберегти OpenAI</Button>
+            {settings.openaiKey && <Button type="button" variant="secondary" disabled={busy} onClick={() => disconnect("openai")}>Видалити OpenAI-ключ</Button>}
+          </div>
+        </form>
+      </Card>
+      <Card className="space-y-3 p-5">
+        <h2 className="font-semibold">Очистити дані цього сайту</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Видалить ключі, списки застосунків, приховані треки та групи тестувальників у цьому браузері. Застосунки й релізи в Google Play залишаться.</p>
+        {confirmClear ? <div className="space-y-3">
+          <Alert tone="warning" title="Видалити всі ключі та локальні списки з цього браузера?">Відновити їх можна буде лише повторним додаванням.</Alert>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="danger" onClick={() => {
+              try { clearBrowserData(); window.location.reload(); } catch { setProblem("Не вдалося очистити сховище браузера."); }
+            }}>Так, видалити локальні дані</Button>
+            <Button variant="secondary" onClick={() => setConfirmClear(false)}>Скасувати</Button>
+          </div>
+        </div> : <Button variant="secondary" disabled={busy} onClick={() => setConfirmClear(true)}>Очистити всі локальні дані</Button>}
+      </Card>
+    </div>
+  </>;
 }
